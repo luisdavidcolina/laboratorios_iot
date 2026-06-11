@@ -1,0 +1,90 @@
+% !TeX spellcheck = es_VE
+\documentclass[12pt,letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{tikz}
+\usepackage[shortlabels]{enumitem} % Se mantiene aquí con sus opciones
+\usepackage{fancyhdr}
+\usepackage[spanish]{babel}
+%\usepackage[acronym]{glossaries}
+%\makeglossaries
+
+% agregar circuitos electronicos
+\usepackage[siunitx, american]{circuitikz}
+
+% comas sencillas en listing
+\usepackage{textcomp}
+\usepackage{upquote}
+\usepackage{listings}
+\lstset{upquote=true}
+
+% dimensiones de pagina
+\usepackage[left=1.5cm,top=1.5cm,right=1.5cm,bottom=2.5cm]{geometry}
+
+% hiperenlaces
+\usepackage{hyperref} % Para incluir hipervínculos
+\hypersetup{urlcolor=blue,colorlinks=false,pdfborder={0 0 0}} % eliminar marco rojo en enlaces (citas, indices, pies de pagina, etc)
+
+% permitir en la numeracion de los items agregar el numero de seccion
+% (Se eliminó la línea duplicada \usepackage{enumitem} que causaba el error)
+\setlist[enumerate]{label=\thesection.\arabic*. }   % numerar solo con seccion
+%\setlist[enumerate]{label=\thesubsection.\arabic*. } % incluir numeracion de subsection
+
+% otras configuraciones
+\usepackage{parskip}
+\setlength{\parskip}{1em} % establece el espacio entre parrafos
+\setlength{\parindent}{0cm} % elimina la sangria inicial en parrafo
+\usepackage{array} % ajustes adicionales para tablas
+% \usepackage{pdfpages} %incluir archivos pdf en documento
+
+% personalizacion de etiquetas
+\renewcommand{\figurename}{Figura}
+\renewcommand{\contentsname}{Contenido}
+\renewcommand{\listfigurename}{Índice de Figuras}
+\renewcommand{\listtablename}{Índice de Tablas}
+\renewcommand{\lstlistlistingname}{Índice de Códigos}
+\renewcommand{\tablename}{Tabla}
+\renewcommand{\lstlistingname}{Código}
+
+% pie de pagina
+\renewcommand{\footrulewidth}{0.4pt}% grosor de linea del pie de pag
+%\lfoot{\thepage} % texto izquierda
+%\rfoot{\thepage} % texto derecha
+\cfoot{\thepage} % texto al centro
+
+%% definiciones para insertar codigo de programacion al doc
+\usepackage{color}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{frame=tb,
+    language=Python,
+    aboveskip=3mm,
+    belowskip=3mm,
+    showstringspaces=false,
+    columns=flexible,
+    basicstyle={\small\ttfamily},
+    %numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{dkgreen},
+    stringstyle=\color{mauve},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=3
+} % fin de codigo de programacion
+
+%%%%%%%%%%%%%% MACRO PARA CONTROL DE PUNTAJE %%%%%%%%%%%%%%%%%%
+\usepackage{xifthen}
+\newcounter{puntos}
+\setcounter{puntos}{0} % Inicializa el contador a cero
+
+\newcommand{\sumarPunto}[1]{%
+    \addtocounter{puntos}{#1}%
+    \ifthenelse{#1 > 1}{(\textbf{#1 puntos})}{(\textbf{#1 punto})} 
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,93 @@
+% !TeX spellcheck = es_VE
+% !TeX root = Informe.tex
+\input{../templates/plantilla_base.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{fancy}
+\fancyhf{}
+
+\setlength{\headheight}{80pt}
+\addtolength{\topmargin}{-35pt}
+\setlength{\headsep}{1cm} 
+
+\rhead{\includegraphics[width=1.4cm]{../img/logo_ciencias.png}}
+\lhead{\includegraphics[width=1.4cm]{../img/logo_ucv.png}}
+\cfoot{\thepage}
+\usepackage[ddmmyy]{datetime}
+\rfoot{\today}
+
+\newcommand{\autorUno}{Luisdavid Colina V24766381}
+\newcommand{\autorDos}{Samantha Ramírez V31307714}
+
+\chead{Laboratorio 2}
+\newcommand{\titulo}{INFORME DE ACTIVIDADES}
+\newcommand{\subtitulo}{Comunicación Serial y Pines Analógicos en ATmega2560}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+    {\Large \textbf{\titulo}} \\[0.3cm]
+    {\large \textbf{\underline{\subtitulo}}} \\[0.8cm]
+    
+    \small
+    \begin{tabular}{c}
+        \textbf{Preparado por:} \\
+        \autorUno \\
+        \autorDos \\
+    \end{tabular}
+    \\[1cm]
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introducción}
+\begin{enumerate}[start=5]
+  \item This is item 5.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Actividades}
+jsjsueuj jdjeidued jjdied
+
+\subsection{}
+jdjkdk dfjkdjej
+\subsection{}
+ejemplo subsection
+\subsection{Etiqueta}
+jdjkdk dfjkdjej
+\subsection{}
+ejemplo para agregar imágenes al informe y como referencialeas dentro del texto (ver imagen \ref{fig:arduinomega}).
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{../img/logo_ucv.png}
+    \caption{Caption}
+    \label{fig:arduinomega}
+\end{figure}
+
+\newpage
+\subsection{}
+ejemplo para agregar código y como referenciarlo (ver código \ref{cod:cod1}).
+\begin{lstlisting}[language={C++}, caption={Ejemplo de uso instrucción map()}, label={cod:cod1}]
+int ldrPin = A0; // Pin de la fotorresistencia
+int ledPin = 9;  // Pin del LED (PWM)
+int valorLDR = 0;
+int brillo = 0;
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  valorLDR = analogRead(ldrPin); // Lee 0-1023
+  // Mapea a 0-255 para el LED
+  brillo = map(valorLDR, 0, 1023, 0, 255); 
+  analogWrite(ledPin, brillo);
+  Serial.println(brillo);
+  delay(100);
+}
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
