@@ -40,88 +40,73 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Desarrollo de actividades}
-El desarrollo de las actividades 4.6 a 4.8 se fundamenta en la integración de señales 
-mixtas y la supervisión de datos mediante protocolos de comunicación serial. 
-El dominio de la conversión analógico-digital (ADC) y la modulación por ancho de 
-pulsos (PWM) representa una competencia estratégica en la ingeniería de sistemas 
-embebidos, permitiendo que un nodo IoT capture magnitudes físicas del entorno y 
-las transforme en variables digitales procesables. Esta capacidad de sensado, 
-combinada con el control de actuadores mediante PWM, facilita la implementación 
-de sistemas de control en lazo abierto y cerrado con una gestión energética optimizada, 
-esencial para dispositivos de monitoreo ambiental autónomos.
 
-\subsection{Actividad 4.6: Diseño y Prototipado del Circuito de Sensado}
-Para la fase de prototipado, se diseñó un circuito utilizando una placa de desarrollo 
-Arduino Uno (basada en el microcontrolador ATmega328P), la cual comparte los principios 
-arquitectónicos del ATmega2560 analizado en la cátedra. Según se observa en las  
-\ref{fig:evidencia1} y \ref{fig:evidencia3} , la configuración física emplea un divisor de tensión compuesto 
-por una fotorresistencia (LDR) conectada al pin analógico  A0  y un LED de salida 
-en el pin digital  6 . El divisor de tensión está configurado de tal forma que la 
-variación de la resistencia del LDR en función de la luz incidente modifica el voltaje 
-muestreado por el microcontrolador.Análisis técnico:  La elección del pin 6 es crítica 
-debido a su capacidad  PWM  (marcada con el símbolo ~ en la placa). A diferencia de un 
-pin digital estándar que solo permite conmutar estados binarios, el pin 6 está vinculado 
-a los periféricos de  Timer/Counter  del hardware. Esto permite generar una señal de 
-salida con un ciclo de trabajo ( Duty Cycle ) variable sin intervención constante de 
-la CPU (control asíncrono), lo cual es indispensable para regular la intensidad 
-luminosa del LED de manera proporcional a la lectura sensorial. Esta interfaz de 
-hardware define las restricciones de muestreo para la implementación del firmware 
-descrita a continuación.
+\subsection{Actividad 4.7 y 4.8: Control de iluminación usando ADC y PWM}
+\textit{Enunciado: Utilizando una fotoresistencia, modifique la intensidad de un led conectado a un pin digital apropiado que permita la simulación de una salida analógica, recuerda colocar la resistencia de protección entre el pin y el led. La intensidad será modificada en función de la intensidad capturada por el fotoresistor que será conectado a una entrada analógica. Al iniciar la placa el led debe estar apagado y se procederá a aumentar la intensidad del led según varíen los valores en el pin analógico. Modifique el código anterior, utilizando la instrucción map(), para que la salida del led sea ajustada a los valores máximos y mínimos obtenidos por la foto-resistencia (note que esto dependerá de la iluminación del espacio). A manera referencial puede apoyarse del Código 1 que se muestra en la sección de “Anexos”.}
+
+En el diseño del circuito (Figura~\ref{fig:evidencia1}) se conectaron 5V a un extremo de la fotorresistencia y el otro extremo al pin A0 (entrada analógica) en serie con una resistencia a GND. Esto se hizo para que el ADC del microcontrolador pudiera traducir los cambios de resistencia física del sensor en variaciones de voltaje procesables.
+Por su parte, el LED se conectó al pin digital 6 porque posee hardware dedicado para PWM, una técnica que enciende y apaga el pin digital tan rápido que simula un voltaje variable. Al ajustar qué tanto tiempo permanece encendido el pin (ciclo de trabajo), el sistema regula la energía enviada al LED de forma suave. Esto permite que el brillo cambie de manera fluida y proporcional a la luz que detecta el sensor.
+
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.5\linewidth]{../img/logo_ucv.png}
-    \caption{Caption}
+    \includegraphics[width=0.8\linewidth]{img/evidencia1.png}
+    \caption{Diseño del circuito en Fritzing.}
     \label{fig:evidencia1}
 \end{figure}
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.5\linewidth]{../img/logo_ucv.png}
-    \caption{Caption}
+    \includegraphics[width=0.6\linewidth]{img/evidencia3.jpg}
+    \caption{Circuito armado en físico.}
     \label{fig:evidencia3}
 \end{figure}
 
-\subsection{Actividad 4.7: Implementación de Lógica y Visualización de Datos}
-La lógica de control se implementó en lenguaje C++, integrando la lectura del ADC y 
-la escritura analógica escalada. 
-Resultados y Análisis:  El Monitor Serial (registrado en la  Evidencia 2 ) refleja 
-valores de valorLDR en torno a  710 , lo que resulta en un valor de brillo de  
-219  tras el proceso de mapeo. Al analizar las  Evidencias 4, 5, 6 y 7 , 
-se valida la respuesta dinámica del sistema: cuando el flujo de fotones sobre el 
-LDR disminuye (al cubrir el sensor con un dedo), su resistencia aumenta, provocando 
-una caída de tensión en el divisor de tensión conectado a A0. El firmware detecta 
-este decremento y reduce proporcionalmente el ciclo de trabajo en el pin 6, 
-resultando en la baja intensidad luminosa observada en las evidencias visuales. 
-La comunicación UART permite monitorear estos estados internos en tiempo real, 
-facilitando la depuración del sistema.
+\pagebreak
+La implementación real (Figura~\ref{fig:evidencia3}) se rige por el código fuente (Figura~\ref{fig:evidencia2}), el cual establece el flujo de datos desde la captura hasta la actuación. Inicia con la vinculación del \texttt{lldrPin} al puerto analógico A0 y el \texttt{lledPin} al puerto digital 6. Dentro del ciclo principal, la instrucción \texttt{analogRead(ldrPin)} activa el ADC de 10 bits para cuantificar la tensión del sensor, almacenando el valor digitalizado en \texttt{lvalorLDR}. Se utiliza la función \texttt{map()}, que escala linealmente el rango dinámico detectado en el laboratorio (145-800) a la resolución de 8 bits (0-255) requerida por el hardware de salida del microcontrolador.
 
-\subsection{Actividad 4.8: Análisis Técnico de la Conversión y Mapeo}
-El núcleo del procesamiento reside en la alineación de datos entre dos periféricos 
-de diferente resolución: el convertidor  ADC de 10 bits  y el registro de comparación 
-del  Timer PWM de 8 bits . El ADC del ATmega discretiza el voltaje de entrada (0-5V) 
-en 1024 niveles, ofreciendo una sensibilidad aproximada de  4.88mV por unidad. 
-Sin embargo, el ciclo de trabajo del PWM se controla mediante un  Output Compare 
-Register (OCRnx)  de 8 bits, limitado a 256 niveles. 
-La función map(valorLDR, 145, 800, 0, 255) es, por tanto, una normalización 
-necesaria para alinear el ancho de banda de datos entre el registro de captura 
-(ADCH/ADCL) y el de salida.El ajuste de los límites del mapeo (145 a 800) 
-constituye una fase de calibración técnica. Estos valores definen la  función 
-de transferencia personalizada  del sistema, adaptándola al rango dinámico real 
-del LDR bajo las condiciones de luz ambiental del laboratorio. Al acotar el rango, 
-se eliminan las "zonas muertas" de la respuesta del sensor, garantizando que la 
-variación lumínica del LED sea lineal y sensible dentro del entorno de operación. 
-Esta integración armónica entre registros de hardware y firmware confirma la 
-eficiencia de la arquitectura ATmega para aplicaciones de control de señales mixtas.
+El ADC ayuda traducir voltaje en datos binarios discretos que la CPU de 8 bits pueda procesar. El rango de valores obtenido en el pin analógico es de 0 a 1023 por su resolución de 10 bits ($2^{10}$ combinaciones), mientras que la escritura en el pin digital PWM está limitada a un rango de 0 a 255.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/evidencia2.png}
+    \caption{Código fuente en el IDE de Arduino.}
+    \label{fig:evidencia2}
+\end{figure}
+
+\pagebreak
+Las Figuras~\ref{fig:evidencia4}, \ref{fig:evidencia5}, \ref{fig:evidencia6}, \ref{fig:evidencia7} confirman que el sistema funciona correctamente: al tapar el sensor con un dedo, la intensidad del LED disminuye de forma inmediata. Técnicamente, esto sucede porque al haber menos luz, la resistencia del sensor aumenta y el voltaje en el pin A0 baja; el programa detecta esta caída y reduce la potencia enviada al LED.
+
+Los datos del Monitor Serial validan esta precisión, mostrando cómo una lectura de 710 en el sensor se convierte fluidamente en un brillo de 219. Gracias a la comunicación en tiempo real, se comprobó que el brillo del LED se ajusta de manera suave y proporcional a los cambios de luz en el laboratorio.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/evidencia4.jpg}
+    \caption{Led con alta intensidad al fotoresistor recibir más luz.}
+    \label{fig:evidencia4}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/evidencia5.jpg}
+    \caption{Led con baja intensidad al fotoresistor recibir menos luz.}
+    \label{fig:evidencia5}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/evidencia6.jpg}
+    \caption{Led con alta intensidad al fotoresistor recibir más luz.}
+    \label{fig:evidencia6}
+\end{figure}\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/evidencia7.jpg}
+    \caption{Led con baja intensidad al fotoresistor recibir menos luz.}
+    \label{fig:evidencia7}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusiones}
-Los resultados obtenidos validan la robustez del microcontrolador ATmega para 
-el procesamiento digital de señales analógicas en tiempo real, destacando la 
-eficiencia de sus periféricos integrados para tareas de telemetría y control.
-\begin{enumerate}
-  \item Resolución de Señal:  La utilización del ADC de 10 bits permite una captura de datos de alta fidelidad con 1024 niveles de cuantización, asegurando una precisión suficiente para detectar variaciones mínimas en sensores ambientales de nodos IoT.
-  \item Simulación Analógica:  El uso de PWM mediante Timers de hardware optimiza el consumo energético al evitar la  disipación de potencia (  $P = V \times I$  )  inherente a los reguladores lineales, permitiendo una regulación de intensidad eficiente para actuadores alimentados por batería.
-  \item Interconectividad:  El puerto serial UART se consolida como un protocolo de bit-stream esencial para la depuración en sistemas embebidos, permitiendo la visibilidad de variables críticas (como el ciclo de trabajo configurado) que definen el comportamiento lógico del sistema.Estas bases técnicas representan los pilares fundamentales para el despliegue de protocolos de comunicación más complejos y arquitecturas de red avanzadas en el ecosistema del Internet de las Cosas.
-\end{enumerate}
+Para concluir, la práctica demuestra que la arquitectura del ATmega2560 permite una integración eficiente entre el entorno físico y el digital mediante el procesamiento de señales mixtas. Se validó que el ADC de 10 bits es el componente esencial para traducir magnitudes analógicas continuas, como la luz captada por la fotorresistencia, en datos digitales procesables (rango 0-1023).
+
+Asimismo, el uso de la técnica PWM en los pines digitales permite emular voltajes variables para controlar actuadores de forma fluida, regulando la potencia del LED según las condiciones del entorno. Finalmente, se determinó que la función map() es una herramienta técnica crítica para normalizar los datos y garantizar la interoperabilidad entre periféricos de distinta resolución, alineando la entrada del sensor con la capacidad de salida de 8 bits del hardware.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begingroup
 \small
