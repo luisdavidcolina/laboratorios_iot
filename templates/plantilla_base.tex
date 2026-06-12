@@ -7,41 +7,38 @@
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{tikz}
-\usepackage[shortlabels]{enumitem} % Se mantiene aquí con sus opciones
+\usepackage[shortlabels]{enumitem}
 \usepackage{fancyhdr}
 \usepackage[spanish]{babel}
 %\usepackage[acronym]{glossaries}
 %\makeglossaries
 
-% agregar circuitos electronicos
+% Circuitos electronicos
 \usepackage[siunitx, american]{circuitikz}
 
-% comas sencillas en listing
+% Comas sencillas en listing
 \usepackage{textcomp}
 \usepackage{upquote}
 \usepackage{listings}
 \lstset{upquote=true}
 
-% dimensiones de pagina
+% Dimensiones de pagina
 \usepackage[left=1.5cm,top=1.5cm,right=1.5cm,bottom=2.5cm]{geometry}
 
-% hiperenlaces
+% Hiperenlaces
 \usepackage{hyperref} % Para incluir hipervínculos
 \hypersetup{urlcolor=blue,colorlinks=false,pdfborder={0 0 0}} % eliminar marco rojo en enlaces (citas, indices, pies de pagina, etc)
 
-% permitir en la numeracion de los items agregar el numero de seccion
-% (Se eliminó la línea duplicada \usepackage{enumitem} que causaba el error)
-\setlist[enumerate]{label=\thesection.\arabic*. }   % numerar solo con seccion
-%\setlist[enumerate]{label=\thesubsection.\arabic*. } % incluir numeracion de subsection
+% Numeracion de los items
+\setlist[enumerate]{label=\thesection.\arabic*. }
 
-% otras configuraciones
+% Configuraciones de texto
 \usepackage{parskip}
-\setlength{\parskip}{1em} % establece el espacio entre parrafos
-\setlength{\parindent}{0cm} % elimina la sangria inicial en parrafo
-\usepackage{array} % ajustes adicionales para tablas
-% \usepackage{pdfpages} %incluir archivos pdf en documento
+\setlength{\parskip}{1em} % Espacio entre parrafos
+\setlength{\parindent}{0cm} % Sangria inicial en parrafo
+\usepackage{array} % Ajustes adicionales para tablas
 
-% personalizacion de etiquetas
+% Etiquetas
 \renewcommand{\figurename}{Figura}
 \renewcommand{\contentsname}{Contenido}
 \renewcommand{\listfigurename}{Índice de Figuras}
@@ -50,13 +47,13 @@
 \renewcommand{\tablename}{Tabla}
 \renewcommand{\lstlistingname}{Código}
 
-% pie de pagina
-\renewcommand{\footrulewidth}{0.4pt}% grosor de linea del pie de pag
+% Pie de pagina
+\renewcommand{\footrulewidth}{0.4pt}% Linea del pie de pagina
 %\lfoot{\thepage} % texto izquierda
 %\rfoot{\thepage} % texto derecha
 \cfoot{\thepage} % texto al centro
 
-%% definiciones para insertar codigo de programacion al doc
+% Codigo de programacion
 \usepackage{color}
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -76,12 +73,12 @@
     breaklines=true,
     breakatwhitespace=true,
     tabsize=3
-} % fin de codigo de programacion
+}
 
-%%%%%%%%%%%%%% MACRO PARA CONTROL DE PUNTAJE %%%%%%%%%%%%%%%%%%
+% Control de puntaje
 \usepackage{xifthen}
 \newcounter{puntos}
-\setcounter{puntos}{0} % Inicializa el contador a cero
+\setcounter{puntos}{0}
 
 \newcommand{\sumarPunto}[1]{%
     \addtocounter{puntos}{#1}%

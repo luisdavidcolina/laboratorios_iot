@@ -8,86 +8,122 @@
 
 \setlength{\headheight}{80pt}
 \addtolength{\topmargin}{-35pt}
-\setlength{\headsep}{1cm} 
+\setlength{\headsep}{1cm}
+\setlength{\footskip}{20pt}
 
-\rhead{\includegraphics[width=1.4cm]{../img/logo_ciencias.png}}
+\rhead{\includegraphics[width=1.3cm]{../img/logo_ciencias.png}}
 \lhead{\includegraphics[width=1.4cm]{../img/logo_ucv.png}}
 \cfoot{\thepage}
-\usepackage[ddmmyy]{datetime}
-\rfoot{\today}
+\rfoot{Junio, 2026}
 
+\chead{Laboratorio de Internet de las Cosas}
+\newcommand{\titulo}{LABORATORIO 2}
+\newcommand{\subtitulo}{Comunicación Serial y Pines Analógicos en ATmega2560}
 \newcommand{\autorUno}{Luisdavid Colina V24766381}
 \newcommand{\autorDos}{Samantha Ramírez V31307714}
-
-\chead{Laboratorio 2}
-\newcommand{\titulo}{INFORME DE ACTIVIDADES}
-\newcommand{\subtitulo}{Comunicación Serial y Pines Analógicos en ATmega2560}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{center}
-    {\Large \textbf{\titulo}} \\[0.3cm]
-    {\large \textbf{\underline{\subtitulo}}} \\[0.8cm]
-    
-    \small
-    \begin{tabular}{c}
-        \textbf{Preparado por:} \\
-        \autorUno \\
-        \autorDos \\
-    \end{tabular}
-    \\[1cm]
+  {\Large \textbf{\titulo}} \\[0.3cm]
+  {\large \textbf{\subtitulo}} \\[0.8cm]
+  
+  \small
+  \begin{tabular}{c}
+    \textbf{Preparado por:} \\
+    \autorUno \\
+    \autorDos \\
+  \end{tabular}
+  \\[1cm]
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Introducción}
-\begin{enumerate}[start=5]
-  \item This is item 5.
-\end{enumerate}
+\section{Desarrollo de actividades}
+El desarrollo de las actividades 4.6 a 4.8 se fundamenta en la integración de señales 
+mixtas y la supervisión de datos mediante protocolos de comunicación serial. 
+El dominio de la conversión analógico-digital (ADC) y la modulación por ancho de 
+pulsos (PWM) representa una competencia estratégica en la ingeniería de sistemas 
+embebidos, permitiendo que un nodo IoT capture magnitudes físicas del entorno y 
+las transforme en variables digitales procesables. Esta capacidad de sensado, 
+combinada con el control de actuadores mediante PWM, facilita la implementación 
+de sistemas de control en lazo abierto y cerrado con una gestión energética optimizada, 
+esencial para dispositivos de monitoreo ambiental autónomos.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Actividades}
-jsjsueuj jdjeidued jjdied
-
-\subsection{}
-jdjkdk dfjkdjej
-\subsection{}
-ejemplo subsection
-\subsection{Etiqueta}
-jdjkdk dfjkdjej
-\subsection{}
-ejemplo para agregar imágenes al informe y como referencialeas dentro del texto (ver imagen \ref{fig:arduinomega}).
+\subsection{Actividad 4.6: Diseño y Prototipado del Circuito de Sensado}
+Para la fase de prototipado, se diseñó un circuito utilizando una placa de desarrollo 
+Arduino Uno (basada en el microcontrolador ATmega328P), la cual comparte los principios 
+arquitectónicos del ATmega2560 analizado en la cátedra. Según se observa en las  
+\ref{fig:evidencia1} y \ref{fig:evidencia3} , la configuración física emplea un divisor de tensión compuesto 
+por una fotorresistencia (LDR) conectada al pin analógico  A0  y un LED de salida 
+en el pin digital  6 . El divisor de tensión está configurado de tal forma que la 
+variación de la resistencia del LDR en función de la luz incidente modifica el voltaje 
+muestreado por el microcontrolador.Análisis técnico:  La elección del pin 6 es crítica 
+debido a su capacidad  PWM  (marcada con el símbolo ~ en la placa). A diferencia de un 
+pin digital estándar que solo permite conmutar estados binarios, el pin 6 está vinculado 
+a los periféricos de  Timer/Counter  del hardware. Esto permite generar una señal de 
+salida con un ciclo de trabajo ( Duty Cycle ) variable sin intervención constante de 
+la CPU (control asíncrono), lo cual es indispensable para regular la intensidad 
+luminosa del LED de manera proporcional a la lectura sensorial. Esta interfaz de 
+hardware define las restricciones de muestreo para la implementación del firmware 
+descrita a continuación.
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.5\linewidth]{../img/logo_ucv.png}
     \caption{Caption}
-    \label{fig:arduinomega}
+    \label{fig:evidencia1}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{../img/logo_ucv.png}
+    \caption{Caption}
+    \label{fig:evidencia3}
 \end{figure}
 
-\newpage
-\subsection{}
-ejemplo para agregar código y como referenciarlo (ver código \ref{cod:cod1}).
-\begin{lstlisting}[language={C++}, caption={Ejemplo de uso instrucción map()}, label={cod:cod1}]
-int ldrPin = A0; // Pin de la fotorresistencia
-int ledPin = 9;  // Pin del LED (PWM)
-int valorLDR = 0;
-int brillo = 0;
+\subsection{Actividad 4.7: Implementación de Lógica y Visualización de Datos}
+La lógica de control se implementó en lenguaje C++, integrando la lectura del ADC y 
+la escritura analógica escalada. 
+Resultados y Análisis:  El Monitor Serial (registrado en la  Evidencia 2 ) refleja 
+valores de valorLDR en torno a  710 , lo que resulta en un valor de brillo de  
+219  tras el proceso de mapeo. Al analizar las  Evidencias 4, 5, 6 y 7 , 
+se valida la respuesta dinámica del sistema: cuando el flujo de fotones sobre el 
+LDR disminuye (al cubrir el sensor con un dedo), su resistencia aumenta, provocando 
+una caída de tensión en el divisor de tensión conectado a A0. El firmware detecta 
+este decremento y reduce proporcionalmente el ciclo de trabajo en el pin 6, 
+resultando en la baja intensidad luminosa observada en las evidencias visuales. 
+La comunicación UART permite monitorear estos estados internos en tiempo real, 
+facilitando la depuración del sistema.
 
-void setup() {
-  pinMode(ledPin, OUTPUT);
-  Serial.begin(9600);
-}
-
-void loop() {
-  valorLDR = analogRead(ldrPin); // Lee 0-1023
-  // Mapea a 0-255 para el LED
-  brillo = map(valorLDR, 0, 1023, 0, 255); 
-  analogWrite(ledPin, brillo);
-  Serial.println(brillo);
-  delay(100);
-}
-\end{lstlisting}
+\subsection{Actividad 4.8: Análisis Técnico de la Conversión y Mapeo}
+El núcleo del procesamiento reside en la alineación de datos entre dos periféricos 
+de diferente resolución: el convertidor  ADC de 10 bits  y el registro de comparación 
+del  Timer PWM de 8 bits . El ADC del ATmega discretiza el voltaje de entrada (0-5V) 
+en 1024 niveles, ofreciendo una sensibilidad aproximada de  4.88mV por unidad. 
+Sin embargo, el ciclo de trabajo del PWM se controla mediante un  Output Compare 
+Register (OCRnx)  de 8 bits, limitado a 256 niveles. 
+La función map(valorLDR, 145, 800, 0, 255) es, por tanto, una normalización 
+necesaria para alinear el ancho de banda de datos entre el registro de captura 
+(ADCH/ADCL) y el de salida.El ajuste de los límites del mapeo (145 a 800) 
+constituye una fase de calibración técnica. Estos valores definen la  función 
+de transferencia personalizada  del sistema, adaptándola al rango dinámico real 
+del LDR bajo las condiciones de luz ambiental del laboratorio. Al acotar el rango, 
+se eliminan las "zonas muertas" de la respuesta del sensor, garantizando que la 
+variación lumínica del LED sea lineal y sensible dentro del entorno de operación. 
+Esta integración armónica entre registros de hardware y firmware confirma la 
+eficiencia de la arquitectura ATmega para aplicaciones de control de señales mixtas.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusiones}
+Los resultados obtenidos validan la robustez del microcontrolador ATmega para 
+el procesamiento digital de señales analógicas en tiempo real, destacando la 
+eficiencia de sus periféricos integrados para tareas de telemetría y control.
+\begin{enumerate}
+  \item Resolución de Señal:  La utilización del ADC de 10 bits permite una captura de datos de alta fidelidad con 1024 niveles de cuantización, asegurando una precisión suficiente para detectar variaciones mínimas en sensores ambientales de nodos IoT.
+  \item Simulación Analógica:  El uso de PWM mediante Timers de hardware optimiza el consumo energético al evitar la  disipación de potencia (  $P = V \times I$  )  inherente a los reguladores lineales, permitiendo una regulación de intensidad eficiente para actuadores alimentados por batería.
+  \item Interconectividad:  El puerto serial UART se consolida como un protocolo de bit-stream esencial para la depuración en sistemas embebidos, permitiendo la visibilidad de variables críticas (como el ciclo de trabajo configurado) que definen el comportamiento lógico del sistema.Estas bases técnicas representan los pilares fundamentales para el despliegue de protocolos de comunicación más complejos y arquitecturas de red avanzadas en el ecosistema del Internet de las Cosas.
+\end{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Referencias}
+jsjsueuj jdjeidued jjdied
 
 \end{document}
