@@ -1,271 +1,204 @@
-%==================================================================
-%  Informe Laboratorio #1 - Laboratorio General (Internet de las Cosas)
-%  Pines Digitales en el Microcontrolador ATmega2560
-%  Autores: Luisdavid Colina (V24766381) y Samantha Ramirez (V31307714)
-%
-%  IMAGENES A SUBIR A OVERLEAF (mismos nombres de archivo):
-%    logo_ucv.png              -> sello UCV (esquina superior izquierda)
-%    logo_ciencias.png             -> logo Escuela de Computacion (derecha)
-%    fig_circuito_led.png      -> Figura del enunciado: circuito LED
-%    fig_circuito_pulsador.png -> Figura del enunciado: circuito pulsador
-%    foto_led_codigo.png       -> TU FOTO: codigo del primer experimento
-%    foto_led_arduino.png      -> TU FOTO: arduino + placa (primer experimento)
-%    foto_boton_codigo.png     -> TU FOTO: codigo del experimento del boton
-%    foto_boton_arduino.png    -> TU FOTO: arduino del experimento del boton
-%
-%  Mientras un archivo no exista, en su lugar se dibuja una caja
-%  con el nombre esperado, de modo que el documento SIEMPRE compila.
-%==================================================================
-\documentclass[11pt,a4paper]{article}
+% !TeX spellcheck = es_VE
+% !TeX root = Informe.tex
+\input{../templates/plantilla_base.tex}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[spanish,es-noshorthands]{babel}
-\usepackage{helvet}
-\usepackage{graphicx}
-\usepackage{geometry}
-\usepackage{fancyhdr}
-\usepackage{enumitem}
-\usepackage{amsmath,amssymb}
-\usepackage{xcolor}
-\usepackage{float}
-\usepackage{caption}
-\usepackage{listings}
-\usepackage{hyperref}
-\usepackage[most]{tcolorbox}
-\usepackage{booktabs}
-
-\renewcommand{\familydefault}{\sfdefault}
-\setlength{\parskip}{0.6em}
-
-\geometry{a4paper, top=2.8cm, bottom=2.5cm, left=2.5cm, right=2.5cm, headheight=40pt}
-\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue, citecolor=black}
-
-% Colores institucionales
-\definecolor{ucvblue}{RGB}{0,51,102}
-\definecolor{enuncbg}{RGB}{240,245,255}
-\definecolor{enuncbar}{RGB}{0,80,160}
-
-%---- Encabezado / pie de pagina ----
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{\IfFileExists{../img/logo_ucv.png}{\includegraphics[height=32pt]{../img/logo_ucv.png}}{}}
-\chead{\small Laboratorio de Internet de las Cosas}
-\rhead{\IfFileExists{../img/logo_ciencias.png}{\includegraphics[height=30pt]{../img/logo_ciencias.png}}{}}
-\renewcommand{\headrulewidth}{1pt}
-\cfoot{\small\thepage}
-\renewcommand{\footrulewidth}{0.4pt}
 
-%---- Entorno de enunciado ----
-\newenvironment{enunciado}{%
-  \par\smallskip
-    \noindent\begingroup\small\itshape
-      \leftskip=1.2em\rightskip=1.2em
-        \textbf{\upshape Enunciado.}\ }{\par\endgroup\smallskip}
+\setlength{\headheight}{80pt}
+\addtolength{\topmargin}{-35pt}
+\setlength{\headsep}{1cm}
+\setlength{\footskip}{20pt}
 
-        %---- Comando \fig[ancho]{archivo}{caption}{label} ----
-        \newcommand{\fig}[4][0.62\linewidth]{%
-          \begin{figure}[H]\centering
-            \IfFileExists{#2}{\includegraphics[width=#1]{#2}}{%
-                \setlength{\fboxsep}{10pt}%
-                    \fbox{\begin{minipage}[c][3.0cm][c]{#1}\centering\footnotesize\ttfamily
-                          [\,IMAGEN: \detokenize{#2}\,]\\[6pt]\normalfont\itshape
-                                (colocar aqu\'i la imagen correspondiente)
-                                    \end{minipage}}}%
-                                      \caption{#3}\label{#4}\end{figure}}
+\rhead{\includegraphics[width=1.3cm]{../img/logo_ciencias.png}}
+\lhead{\includegraphics[width=1.4cm]{../img/logo_ucv.png}}
+\cfoot{\thepage}
+\rfoot{Junio, 2026}
 
-                                      %---- Estilo de codigo Arduino ----
-                                      \definecolor{codegreen}{RGB}{0,120,0}
-                                      \definecolor{codegray}{RGB}{120,120,120}
-                                      \definecolor{codeblue}{RGB}{0,0,180}
-                                      \definecolor{codebg}{RGB}{250,250,252}
-                                      \lstdefinestyle{arduino}{
-                                        language=C++,
-                                          basicstyle=\ttfamily\small,
-                                            keywordstyle=\color{codeblue}\bfseries,
-                                              commentstyle=\color{codegray}\itshape,
-                                                stringstyle=\color{codegreen},
-                                                  numbers=left, numberstyle=\tiny\color{codegray}, numbersep=10pt,
-                                                    breaklines=true,
-                                                      frame=single, framesep=4pt,
-                                                        backgroundcolor=\color{codebg},
-                                                          rulecolor=\color{gray!40},
-                                                            tabsize=2, showstringspaces=false, captionpos=b,
-                                                              morekeywords={setup,loop,pinMode,digitalWrite,digitalRead,delay,
-                                                                              HIGH,LOW,OUTPUT,INPUT,INPUT_PULLUP,Serial,boolean,byte}
-                                                                              }
-                                                                              \lstset{style=arduino}
+\chead{Laboratorio de Internet de las Cosas}
+\newcommand{\titulo}{LABORATORIO 1}
+\newcommand{\subtitulo}{Pines Digitales en el Microcontrolador ATmega2560}
+\newcommand{\autorUno}{Luisdavid Colina V24766381}
+\newcommand{\autorDos}{Samantha Ramírez V31307714}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
 
-                                                                              % Formato de secciones mas limpio
-                                                                              \usepackage{titlesec}
-                                                                              \titleformat{\section}{\large\bfseries\color{ucvblue}}{{\thesection.}}{0.5em}{}[\vspace{-0.3em}\rule{\linewidth}{0.6pt}]
-                                                                              \titleformat{\subsection}[runin]{\bfseries}{}{0pt}{}[.\quad]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+  {\Large \textbf{\titulo}} \\[0.3cm]
+  {\large \textbf{\subtitulo}} \\[0.8cm]
+  
+  \small
+  \begin{tabular}{c}
+    \textbf{Preparado por:} \\
+    \autorUno \\
+    \autorDos \\
+  \end{tabular}
+  \\[1cm]
+\end{center}
 
-                                                                              \begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Desarrollo de actividades}
 
-                                                                              %==================== PORTADA ====================
-                                                                              \begin{titlepage}
-                                                                              \thispagestyle{empty}
+\subsection{Actividad 5.1: Selección de placa y puerto}
+\textit{Enunciado: Ejecutar el Arduino IDE. Investigue acerca de los pasos que debe seguir para seleccionar
+la placa correcta y el puerto de comunicación, indique cuál es el puerto seleccionado.
+Explique cómo se realiza la comunicación entre su PC y la placa Arduino.
+¿Qué tipo de comunicación es utilizada?}
 
-                                                                              % Cabecera con logos e institucion
-                                                                              \begin{center}
-                                                                              \begin{minipage}[c]{0.13\textwidth}
-                                                                                \IfFileExists{../img/logo_ucv.png}{\includegraphics[width=\linewidth]{../img/logo_ucv.png}}{}
-                                                                                \end{minipage}\hfill
-                                                                                \begin{minipage}[c]{0.70\textwidth}\centering
-                                                                                  {\large\bfseries Universidad Central de Venezuela}\\[2pt]
-                                                                                    {\normalsize Facultad de Ciencias --- Escuela de Computaci\'on}\\[2pt]
-                                                                                      {\normalsize 6565 --- Laboratorio General (Internet de las Cosas)}
-                                                                                      \end{minipage}\hfill
-                                                                                      \begin{minipage}[c]{0.12\textwidth}
-                                                                                        \IfFileExists{../img/logo_ciencias.png}{\includegraphics[width=\linewidth]{../img/logo_ciencias.png}}{}
-                                                                                        \end{minipage}
-                                                                                        \end{center}
+Para seleccionar la placa se ingresó al menú \emph{Herramientas} $\to$ \emph{Placa}
+y se escogió ``Arduino UNO''. Luego, en \emph{Herramientas} $\to$ \emph{Puerto},
+el sistema operativo había asignado automáticamente el puerto \texttt{/dev/ttyACM0}
+al detectar la placa conectada por USB; ese fue el puerto seleccionado.
 
-                                                                                        \vspace{0.4cm}
-                                                                                        {\color{ucvblue}\rule{\linewidth}{2pt}}
+La comunicación entre el PC y la placa es de tipo serial asíncrona (UART). La placa
+incluye un microcontrolador secundario (ATmega16U2) que actúa como puente entre la
+interfaz USB del computador y el puerto UART del ATmega328P~\cite{unoboard}. Por esta
+razón, el mismo cable USB que alimenta la placa es el que se usa para cargar los
+programas desde el IDE.
 
-                                                                                        \vspace{3.5cm}
-                                                                                        \begin{center}
-                                                                                          {\fontsize{13}{16}\selectfont\bfseries INFORME DE LABORATORIO \#1}\\[1.2cm]
-                                                                                            {\fontsize{20}{26}\selectfont\bfseries Pines Digitales en el\\[0.4cm]
-                                                                                               Microcontrolador ATmega2560}
-                                                                                               \end{center}
+\subsection{Actividad 5.7: Control de un LED en el pin digital~13}
+\textit{Enunciado: Utilizando el protoboard, construya un circuito con una resistencia de protección
+(220~$\Omega$) conectado a un LED y enciéndalo y apáguelo cada 2~segundos usando el
+pin digital~7. Muestre el código y el circuito.}
 
-                                                                                               \vspace{3.5cm}
-                                                                                               \noindent
-                                                                                               \begin{minipage}[t]{0.48\textwidth}
-                                                                                                 {\bfseries Profesor}\\[0.3cm]
-                                                                                                   Prof.\ Antonio Russoniello
-                                                                                                   \end{minipage}\hfill
-                                                                                                   \begin{minipage}[t]{0.48\textwidth}\raggedleft
-                                                                                                     {\bfseries Elaborado por}\\[0.3cm]
-                                                                                                       Luisdavid Colina \quad V-24\,766\,381\\[0.15cm]
-                                                                                                         Samantha Ram\'irez \quad V-31\,307\,714
-                                                                                                         \end{minipage}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/fig_circuito_led.png}
+    \caption{Circuito de referencia del enunciado: LED con resistencia de protección.}
+    \label{fig:led_ref}
+\end{figure}
+Siguiendo el circuito de la Figura~\ref{fig:led_ref}, se armó sobre el protoboard
+una conexión entre el pin~13 de la placa, una resistencia de 220~$\Omega$ y un LED
+rojo, cerrando el circuito hacia GND. La alimentación y la tierra se tomaron
+directamente de los pines de la placa, sin usar los rieles del protoboard.
 
-                                                                                                         \vfill
-                                                                                                         {\color{ucvblue}\rule{\linewidth}{1pt}}
-                                                                                                         \begin{center}
-                                                                                                           \small Caracas, 10 de junio de 2026 \quad|\quad Semestre 1-2026
-                                                                                                           \end{center}
-                                                                                                           \end{titlepage}
+El código utilizado se muestra en la Figura~\ref{fig:led_codigo}. Declara el
+pin~13 como salida y en \texttt{loop()} lo alterna entre encendido y apagado con una
+pausa de 1~segundo en cada estado mediante \texttt{delay(1000)}~\cite{arduinoref}.
+El montaje final puede verse en la Figura~\ref{fig:led_arduino}.
 
-                                                                                                           %==================== ACTIVIDADES ====================
-                                                                                                           \section*{Desarrollo de las Actividades}
+Al ejecutar el programa se observó que el LED rojo en el protoboard parpadeaba al
+mismo tiempo que el LED integrado de la placa, porque el pin~13 está físicamente
+conectado a ambos~\cite{unoboard}. Se comprobó también que la resistencia de
+220~$\Omega$ es necesaria: sin ella la corriente no estaría limitada y podría
+dañar el pin o el LED~\cite{guialab}.
 
-                                                                                                           % ---- 5.1 ----
-                                                                                                           \subsection*{Selecci\'on de placa y puerto}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/foto_led_codigo.png}
+    \caption{Código del experimento: parpadeo del LED en pin~13.}
+    \label{fig:led_codigo}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/foto_led_arduino.png}
+    \caption{Montaje del circuito LED rojo sobre el protoboard.}
+    \label{fig:led_arduino}
+\end{figure}
 
-                                                                                                           \begin{enunciado}
-                                                                                                           Ejecutar el Arduino IDE. Investigue acerca de los pasos que debe seguir para seleccionar
-                                                                                                           la placa correcta y el puerto de comunicaci\'on, indique cu\'al es el puerto seleccionado.
-                                                                                                           Explique c\'omo se realiza la comunicaci\'on entre su PC y la placa Arduino.
-                                                                                                           \textquestiondown Qu\'e tipo de comunicaci\'on es utilizada?
-                                                                                                           \end{enunciado}
+\subsection{Actividad 5.8: Lectura de un pulsador}
+\textit{Enunciado: Modifique el circuito anterior conectando un pulsador en el pin digital~2 y modifique el
+código para que el LED encienda y apague cada vez que se presione el pulsador.}
 
-                                                                                                           Para seleccionar la placa se ingres\'o al men\'u \emph{Herramientas} $\to$ \emph{Placa}
-                                                                                                           y se escogi\'o ``Arduino UNO''. Luego, en \emph{Herramientas} $\to$ \emph{Puerto},
-                                                                                                           el sistema operativo hab\'ia asignado autom\'aticamente el puerto \texttt{/dev/ttyACM0}
-                                                                                                           al detectar la placa conectada por USB; ese fue el puerto seleccionado.
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/fig_circuito_pulsador.png}
+    \caption{Circuito de referencia del enunciado: pulsador y LED.}
+    \label{fig:pulsador_ref}
+\end{figure}
 
-                                                                                                           La comunicaci\'on entre el PC y la placa es de tipo serial as\'incrona (UART). La placa
-                                                                                                           incluye un microcontrolador secundario (ATmega16U2) que actúa como puente entre la
-                                                                                                           interfaz USB del computador y el puerto UART del ATmega328P~\cite{unoboard}. Por esta
-                                                                                                           raz\'on, el mismo cable USB que alimenta la placa es el que se usa para cargar los
-                                                                                                           programas desde el IDE.
+Tomando como referencia la Figura~\ref{fig:pulsador_ref}, se agregó un pulsador
+al circuito anterior conectándolo a otro pin digital de la placa. El pin del
+pulsador se configuró como \texttt{INPUT\_PULLUP} para garantizar un nivel lógico
+definido cuando el botón no está presionado~\cite{arduinoref}. El montaje con el
+pulsador incorporado puede verse en la Figura~\ref{fig:boton_arduino}.
 
-                                                                                                           % ---- 5.7 ----
-                                                                                                           \subsection*{Control de un LED en el pin digital~13}
+El código, mostrado en la Figura~\ref{fig:boton_codigo}, usa una variable
+\texttt{state} para recordar si el LED está encendido o apagado y la alterna cada
+vez que se lee una pulsación con \texttt{digitalRead()}~\cite{arduinoref}.
 
-                                                                                                           \begin{enunciado}
-                                                                                                           Utilizando el protoboard, construya un circuito con una resistencia de protecci\'on
-                                                                                                           (220~$\Omega$) conectado a un LED y enci\'endalo y ap\'aguelo cada 2~segundos usando el
-                                                                                                           pin digital~7. Muestre el c\'odigo y el circuito.
-                                                                                                           \end{enunciado}
+Al probarlo se observó que con cada pulsación el LED cambiaba de estado: si
+estaba apagado se encendía, y si estaba encendido se apagaba. Esto permitió ver
+en la práctica cómo una entrada digital puede controlar una salida, y la
+diferencia entre configurar un pin como entrada y como salida~\cite{guialab}.
 
-                                                                                                           \fig[0.58\linewidth]{img/fig_circuito_led.png}{Circuito de referencia del enunciado: LED con resistencia de protecci\'on.}{fig:led_ref}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/foto_boton_codigo.png}
+    \caption{Código del experimento con pulsador.}
+    \label{fig:boton_codigo}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/fig_circuito_pulsador.png}
+    \caption{Montaje del circuito con pulsador sobre el protoboard.}
+    \label{fig:boton_arduino}
+\end{figure}
 
-                                                                                                           Siguiendo el circuito de la Figura~\ref{fig:led_ref}, se arm\'o sobre el protoboard
-                                                                                                           una conexi\'on entre el pin~13 de la placa, una resistencia de 220~$\Omega$ y un LED
-                                                                                                           rojo, cerrando el circuito hacia GND. La alimentaci\'on y la tierra se tomaron
-                                                                                                           directamente de los pines de la placa, sin usar los rieles del protoboard.
+\subsection{Prueba adicional: persistencia del programa}
+Como prueba adicional se desconectó la placa del USB, se esperaron unos segundos
+y se volvió a conectar. El LED retomó el parpadeo de forma automática sin
+necesidad de volver a cargar el programa. Al presionar el botón de Reset ocurrió
+lo mismo. Esto confirma que el código queda almacenado en la memoria Flash del
+microcontrolador, que es no volátil y conserva su contenido sin
+alimentación~\cite{atmega328,guialab}.
 
-                                                                                                           El c\'odigo utilizado se muestra en la Figura~\ref{fig:led_codigo}. Declara el
-                                                                                                           pin~13 como salida y en \texttt{loop()} lo alterna entre encendido y apagado con una
-                                                                                                           pausa de 1~segundo en cada estado mediante \texttt{delay(1000)}~\cite{arduinoref}.
-                                                                                                           El montaje final puede verse en la Figura~\ref{fig:led_arduino}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusiones}
+A través de las actividades realizadas se logró una introducción práctica al manejo
+de pines digitales con la plataforma Arduino UNO (ATmega328P). Se comprendió que la
+comunicación entre el IDE y la placa ocurre mediante UART encapsulada sobre USB, y que
+el programa cargado persiste en la memoria Flash no volátil, conservándose ante reinicios
+y desconexiones de alimentación~\cite{unoboard,atmega328,arduinoref}.
 
-                                                                                                           Al ejecutar el programa se observ\'o que el LED rojo en el protoboard parpadeaba al
-                                                                                                           mismo tiempo que el LED integrado de la placa, porque el pin~13 est\'a f\'isicamente
-                                                                                                           conectado a ambos~\cite{unoboard}. Se comprob\'o tambi\'en que la resistencia de
-                                                                                                           220~$\Omega$ es necesaria: sin ella la corriente no estar\'ia limitada y podr\'ia
-                                                                                                           da\~nar el pin o el LED~\cite{guialab}.
+En el montaje del circuito con LED rojo se pudo verificar en la práctica la función de
+la resistencia de protección: limitar la corriente al rango seguro de operación del pin,
+evitando da\~nos tanto al LED como al microcontrolador. La alimentación tomada directamente
+de los pines de la placa resultó suficiente y simplificó el cableado.
 
-                                                                                                           \fig[0.6\linewidth]{img/foto_led_codigo.png}{C\'odigo del experimento: parpadeo del LED en pin~13.}{fig:led_codigo}
-                                                                                                           \fig[0.6\linewidth]{img/foto_led_arduino.png}{Montaje del circuito LED rojo sobre el protoboard.}{fig:led_arduino}
+Con la incorporación del pulsador se trabajó por primera vez con una entrada digital,
+lo que evidenció la importancia de fijar el nivel lógico del pin mediante la resistencia
+pull-up interna (\texttt{INPUT\_PULLUP}) para obtener lecturas estables. En conjunto,
+estas experiencias sientan las bases para el desarrollo de aplicaciones más complejas
+en el área de Internet de las Cosas~\cite{guialab,arduinoref}.
 
-                                                                                                           % ---- 5.8 ----
-                                                                                                           \subsection*{Lectura de un pulsador}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begingroup
+\small
+\begin{thebibliography}{9}
 
-                                                                                                           \begin{enunciado}
-                                                                                                           Modifique el circuito anterior conectando un pulsador en el pin digital~2 y modifique el
-                                                                                                           c\'odigo para que el LED encienda y apague cada vez que se presione el pulsador.
-                                                                                                           \end{enunciado}
+\bibitem{unoboard}
+Arduino, ``Arduino UNO Rev3 --- Datasheet and Schematics,''
+\emph{Arduino Hardware Documentation}, Arduino LLC, Ivrea, Italia, 2023.
+[En línea]. Disponible: \url{https://docs.arduino.cc/hardware/uno-rev3}.
+[Consulta: jun.~2026]
 
-                                                                                                           \fig[0.58\linewidth]{img/fig_circuito_pulsador.png}{Circuito de referencia del enunciado: pulsador y LED.}{fig:pulsador_ref}
+\bibitem{atmega328}
+Microchip Technology Inc., ``ATmega328/P --- 8-bit AVR Microcontroller with
+32K Bytes In-System Programmable Flash,'' Datasheet Rev.~DS40002061B,
+Microchip Technology Inc., Chandler, AZ, EE.UU., 2018.
 
-                                                                                                           Tomando como referencia la Figura~\ref{fig:pulsador_ref}, se agreg\'o un pulsador
-                                                                                                           al circuito anterior conect\'andolo a otro pin digital de la placa. El pin del
-                                                                                                           pulsador se configur\'o como \texttt{INPUT\_PULLUP} para garantizar un nivel l\'ogico
-                                                                                                           definido cuando el bot\'on no est\'a presionado~\cite{arduinoref}. El montaje con el
-                                                                                                           pulsador incorporado puede verse en la Figura~\ref{fig:boton_arduino}.
+\bibitem{guialab}
+A.~Russoniello, ``Laboratorio: Pines Digitales en el Microcontrolador
+ATmega2560,'' guía de práctica de laboratorio, Laboratorio General
+(Internet de las Cosas), Escuela de Computación, Facultad de Ciencias,
+Universidad Central de Venezuela, Caracas, 2026.
 
-                                                                                                           El c\'odigo, mostrado en la Figura~\ref{fig:boton_codigo}, usa una variable
-                                                                                                           \texttt{state} para recordar si el LED est\'a encendido o apagado y la alterna cada
-                                                                                                           vez que se lee una pulsaci\'on con \texttt{digitalRead()}~\cite{arduinoref}.
+\bibitem{arduinoref}
+Arduino, ``Arduino Language Reference,'' \emph{Arduino Documentation},
+Arduino LLC, 2024. [En línea]. Disponible:
+\url{https://docs.arduino.cc/language-reference/}. [Consulta: jun.~2026]
 
-                                                                                                           Al probarlo se observ\'o que con cada pulsaci\'on el LED cambiaba de estado: si
-                                                                                                           estaba apagado se encend\'ia, y si estaba encendido se apagaba. Esto permiti\'o ver
-                                                                                                           en la pr\'actica c\'omo una entrada digital puede controlar una salida, y la
-                                                                                                           diferencia entre configurar un pin como entrada y como salida~\cite{guialab}.
+\bibitem{fritzing}
+A.~Knörig, R.~Wettach y J.~Cohen, ``Fritzing: A Tool for Advancing
+Electronic Prototyping for Designers,'' en \emph{Proc. 3rd Int. Conf.
+Tangible and Embedded Interaction (TEI'09)}, Cambridge, Reino Unido,
+feb.~2009, pp.~351--358. [En línea]. Disponible: \url{https://fritzing.org/}.
+[Consulta: jun.~2026]
 
-                                                                                                           \fig[0.6\linewidth]{img/foto_boton_codigo.png}{C\'odigo del experimento con pulsador.}{fig:boton_codigo}
-                                                                                                           \fig[0.6\linewidth]{img/foto_boton_arduino.png}{Montaje del circuito con pulsador sobre el protoboard.}{fig:boton_arduino}
+\end{thebibliography}
+\endgroup
 
-                                                                                                           \subsubsection*{Prueba adicional: persistencia del programa}
-
-                                                                                                           Como prueba adicional se desconect\'o la placa del USB, se esperaron unos segundos
-                                                                                                           y se volvi\'o a conectar. El LED retom\'o el parpadeo de forma autom\'atica sin
-                                                                                                           necesidad de volver a cargar el programa. Al presionar el bot\'on de Reset ocurri\'o
-                                                                                                           lo mismo. Esto confirma que el c\'odigo queda almacenado en la memoria Flash del
-                                                                                                           microcontrolador, que es no vol\'atil y conserva su contenido sin
-                                                                                                           alimentaci\'on~\cite{atmega328,guialab}.
-
-                                                                                                           %==================== CONCLUSIONES ====================
-                                                                                                           \newpage
-                                                                                                           \section*{Conclusiones}
-
-                                                                                                           A trav\'es de las actividades realizadas se logr\'o una introducci\'on pr\'actica al manejo
-                                                                                                           de pines digitales con la plataforma Arduino UNO (ATmega328P). Se comprendi\'o que la
-                                                                                                           comunicaci\'on entre el IDE y la placa ocurre mediante UART encapsulada sobre USB, y que
-                                                                                                           el programa cargado persiste en la memoria Flash no vol\'atil, conserv\'andose ante reinicios
-                                                                                                           y desconexiones de alimentaci\'on~\cite{unoboard,atmega328,arduinoref}.
-
-                                                                                                           En el montaje del circuito con LED rojo se pudo verificar en la pr\'actica la funci\'on de
-                                                                                                           la resistencia de protecci\'on: limitar la corriente al rango seguro de operaci\'on del pin,
-                                                                                                           evitando da\~nos tanto al LED como al microcontrolador. La alimentaci\'on tomada directamente
-                                                                                                           de los pines de la placa result\'o suficiente y simplific\'o el cableado.
-
-                                                                                                           Con la incorporaci\'on del pulsador se trabaj\'o por primera vez con una entrada digital,
-                                                                                                           lo que evidenci\'o la importancia de fijar el nivel l\'ogico del pin mediante la resistencia
-                                                                                                           pull-up interna (\texttt{INPUT\_PULLUP}) para obtener lecturas estables. En conjunto,
-                                                                                                           estas experiencias sientan las bases para el desarrollo de aplicaciones m\'as complejas
-                                                                                                           en el \'area de Internet de las Cosas~\cite{guialab,arduinoref}.
-
-                                                                                                           %==================== REFERENCIAS ====================
-                                                                                                           \newpage
-                                                                                                           
-
-                                                                                                           \end{document}
-                                                                                                           
+\end{document}
