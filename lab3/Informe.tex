@@ -1,6 +1,7 @@
 % !TeX spellcheck = es_VE
 % !TeX root = Informe.tex
 \input{../templates/plantilla_base.tex}
+\usepackage[T1]{fontenc}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagestyle{fancy}
@@ -18,9 +19,9 @@
 
 \chead{Laboratorio de Internet de las Cosas}
 \newcommand{\titulo}{LABORATORIO 3}
-\newcommand{\subtitulo}{Comunicación Serial y Pines Analógicos en ATmega2560}
+\newcommand{\subtitulo}{Interfaz Gr\'{a}fica con Processing y Protocolo Firmata}
 \newcommand{\autorUno}{Luisdavid Colina V24766381}
-\newcommand{\autorDos}{Samantha Ramírez V31307714}
+\newcommand{\autorDos}{Samantha Ram\'{i}rez V31307714}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
@@ -28,7 +29,7 @@
 \begin{center}
   {\Large \textbf{\titulo}} \\[0.3cm]
   {\large \textbf{\subtitulo}} \\[0.8cm]
-  
+
   \small
   \begin{tabular}{c}
     \textbf{Preparado por:} \\
@@ -41,23 +42,291 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Desarrollo de actividades}
 
-\subsection{Actividad }
-xd
+\subsection{Actividad 5.1: Carga del firmware StandardFirmata}
+\textit{Enunciado: Compile y suba a la placa el c\'{o}digo StandardFirmata disponible en la
+secci\'{o}n de ejemplos del IDE de Arduino.}
+
+Firmata es un protocolo que permite controlar los pines del Arduino desde un programa
+externo en el computador sin tener que reprogramar la placa cada vez~\cite{firmata}.
+Para cargarlo, se fue a \emph{Archivo} $\to$ \emph{Ejemplos} $\to$ \emph{Firmata} $\to$
+\texttt{StandardFirmata} en el IDE y se subi\'{o} a la placa por USB. Con eso el Arduino
+queda escuchando comandos por el puerto serie a 57\,600~baud y Processing puede
+comunicarse con \'{e}l directamente.
+
+\subsection{Actividad 5.2: Control de LED RGB desde Processing}
+\textit{Enunciado: Construya una interfaz de usuario, utilizando Processing, que permita
+controlar la intensidad y el color de un led RGB conectado a la placa, los controles deben
+ser de tipo \emph{slider}. Muestre un componente que represente al LED RGB y que modifique
+su color conforme a los sliders. Implemente un componente que muestre los valores de los
+componentes RGB y un gr\'{a}fico de intensidad de color.}
+
+Para el circuito se conectaron las tres patas del LED RGB a los pines 3, 6 y 5 de la placa
+(rojo, verde y azul), cada una con su resistencia de 220~$\Omega$. Se usaron esos pines
+en particular porque tienen soporte PWM, que es lo que se necesita para variar la
+intensidad de cada color. El dise\~{n}o en Fritzing se puede ver en la
+Figura~\ref{fig:diseno_act1} y el montaje armado en la Figura~\ref{fig:circuito_act1}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/diseno_act1.png}
+    \caption{Dise\~{n}o del circuito para el LED RGB en Fritzing.}
+    \label{fig:diseno_act1}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/circuito_act1.jpg}
+    \caption{Montaje f\'{i}sico del LED RGB sobre el protoboard.}
+    \label{fig:circuito_act1}
+\end{figure}
+
+\pagebreak
+La interfaz se hizo en Processing usando las librer\'{i}as \texttt{controlP5} (para los
+controles de la pantalla) y \texttt{cc.arduino} (para hablar con la placa por Firmata).
+Lo primero fue declarar los pines y configurarlos como salida
+(C\'{o}digo~\ref{lst:pin_setup}):
+
+\begin{lstlisting}[language=Java,
+    caption={Declaraci\'{o}n de pines y configuraci\'{o}n en \texttt{setup()}.},
+    label={lst:pin_setup}]
+int ledRojo = 3;
+int ledVerde = 6;
+int ledAzul  = 5;
+
+arduino = new Arduino(this, Arduino.list()[2], 57600);
+arduino.pinMode(ledRojo, Arduino.OUTPUT);
+arduino.pinMode(ledVerde, Arduino.OUTPUT);
+arduino.pinMode(ledAzul,  Arduino.OUTPUT);
+\end{lstlisting}
+
+Los tres sliders se crearon con \texttt{cp5.addSlider()} con rango de 0 a 255, que es el
+rango del PWM en 8 bits (C\'{o}digo~\ref{lst:sliders}). Tambi\'{e}n se agreg\'{o} un
+gr\'{a}fico de l\'{i}nea para mostrar el historial de intensidad.
+
+\begin{lstlisting}[language=Java,
+    caption={Creaci\'{o}n de sliders y gr\'{a}fico en \texttt{setup()}.},
+    label={lst:sliders}]
+cp5.addSlider("slider1").setPosition(50,  50).setRange(0, 255).setSize(150, 20);
+cp5.addSlider("slider2").setPosition(50, 110).setRange(0, 255).setSize(150, 20);
+cp5.addSlider("slider3").setPosition(50, 170).setRange(0, 255).setSize(150, 20);
+
+myChart1 = cp5.addChart("ledVerde")
+              .setPosition(50, 200).setSize(200, 100)
+              .setRange(0, 255).setView(Chart.LINE).setStrokeWeight(1.5);
+myChart1.addDataSet("incoming");
+myChart1.setData("incoming", new float[100]);
+\end{lstlisting}
+
+En \texttt{draw()} se lee el valor de cada slider y se manda al pin correspondiente con
+\texttt{analogWrite()}. Tambi\'{e}n se llama a \texttt{dibujarLED()} para mostrar en
+pantalla el estado del LED, y se actualiza el gr\'{a}fico cada 5 frames para que no sea
+tan pesado (C\'{o}digo~\ref{lst:draw_rgb}). La funci\'{o}n \texttt{dibujarLED()} usa el
+alfa del color para que el c\'{i}rculo en pantalla sea m\'{a}s o menos brillante seg\'{u}n
+el valor del slider, igual que el LED f\'{i}sico (C\'{o}digo~\ref{lst:led_draw}).
+
+\begin{lstlisting}[language=Java,
+    caption={Lectura de sliders, escritura en pines y actualizaci\'{o}n visual en
+    \texttt{draw()}.},
+    label={lst:draw_rgb}]
+int valorSlider1 = (int)cp5.getController("slider1").getValue();
+int valorSlider2 = (int)cp5.getController("slider2").getValue();
+int valorSlider3 = (int)cp5.getController("slider3").getValue();
+
+arduino.analogWrite(ledRojo, valorSlider1);
+arduino.analogWrite(ledVerde, valorSlider2);
+arduino.analogWrite(ledAzul,  valorSlider3);
+
+dibujarLED(260,  60, color(255, 0, 0), valorSlider1);
+dibujarLED(260, 120, color(0, 255, 0), valorSlider2);
+dibujarLED(260, 180, color(0, 0, 255), valorSlider3);
+
+if (frameCount % 5 == 0)
+    myChart1.push("incoming", valorSlider3);
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java,
+    caption={Funci\'{o}n para dibujar el LED virtual en pantalla.},
+    label={lst:led_draw}]
+void dibujarLED(int x, int y, color c, int val) {
+    fill(red(c), green(c), blue(c), val);
+    noStroke();
+    ellipse(x, y, 40, 40);
+    stroke(255, 50);
+    noFill();
+    ellipse(x, y, 30, 30);
+}
+\end{lstlisting}
+
+Adem\'{a}s se implement\'{o} un panel que muestra en tiempo real los valores de los tres
+canales y la fotorresistencia (C\'{o}digo~\ref{lst:panel_valores}).
+
+\begin{lstlisting}[language=Java,
+    caption={Panel de valores en tiempo real.},
+    label={lst:panel_valores}]
+void dibujarVentanaValores(int x, int y, int w, int h) {
+    fill(0, 0, 0, 150);
+    stroke(255, 100);
+    rect(x, y, w, h, 10);
+    fill(0, 255, 0);
+    textSize(12);
+    text("DATOS EN TIEMPO REAL", x + 10, y + 20);
+    fill(255);
+    textSize(14);
+    text("Led Rojo:        " + nf(cp5.getController("slider1").getValue(), 0, 1), x+10, y+45);
+    text("Led Verde:       " + nf(cp5.getController("slider2").getValue(), 0, 1), x+10, y+65);
+    text("Led Azul:        " + nf(cp5.getController("slider3").getValue(), 0, 1), x+10, y+85);
+    text("Fotoresistencia: " + nf(arduino.analogRead(0),                  0, 1), x+10, y+105);
+}
+\end{lstlisting}
+
+En la Figura~\ref{fig:resultado_act1_interfaz} se ve la interfaz corriendo con los sliders,
+los LEDs virtuales, el panel de valores y el gr\'{a}fico. La
+Figura~\ref{fig:resultado_act1_led} muestra el LED f\'{i}sico encendido con el color que
+se le estaba mandando desde la interfaz.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/resultado_act1_interfaz.png}
+    \caption{Interfaz en ejecuci\'{o}n: sliders, LEDs virtuales, panel de valores y gr\'{a}fico.}
+    \label{fig:resultado_act1_interfaz}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/resultado_act1_led.jpg}
+    \caption{LED RGB encendido f\'{i}sicamente con el color definido en la interfaz.}
+    \label{fig:resultado_act1_led}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 5.3: Lectura de fotorresistencia}
+\textit{Esta secci\'{o}n corresponde a la participante Samantha Ram\'{i}rez y est\'{a}
+pendiente de desarrollo.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 5.4: Control de servo motor}
+\textit{Enunciado: Modifique el c\'{o}digo anterior, agregue una opci\'{o}n para controlar
+un servo motor. Muestre un control de tipo \emph{knob} que indique el desplazamiento en
+grados del brazo del servo. Al encontrarse el control en su valor medio, el servo debe
+estar a $90^\circ$.}
+
+Se agreg\'{o} un servo motor al circuito connect\'{a}ndolo al pin digital 10. En modo
+Firmata, al configurar un pin como servo, la placa genera autom\'{a}ticamente la se\~{n}al
+de posicionamiento sin que Processing tenga que hacer nada extra~\cite{firmata}. El
+dise\~{n}o del circuito est\'{a} en la Figura~\ref{fig:diseno_act3} y el montaje f\'{i}sico
+en la Figura~\ref{fig:circuito_act3}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/diseno_act3.png}
+    \caption{Dise\~{n}o del circuito para el servo motor en Fritzing.}
+    \label{fig:diseno_act3}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/circuito_act3.jpg}
+    \caption{Montaje f\'{i}sico del servo motor sobre el protoboard.}
+    \label{fig:circuito_act3}
+\end{figure}
+
+\pagebreak
+El pin 10 se configur\'{o} con \texttt{Arduino.SERVO} para que Firmata sepa que tiene que
+manejar ese pin como servo y no como salida digital normal
+(C\'{o}digo~\ref{lst:servo_setup}):
+
+\begin{lstlisting}[language=Java,
+    caption={Declaraci\'{o}n y configuraci\'{o}n del pin del servo.},
+    label={lst:servo_setup}]
+int servoPin = 10;
+...
+arduino.pinMode(servoPin, Arduino.SERVO);
+\end{lstlisting}
+
+Para el knob se us\'{o} un rango de $-180$ a $0$ en lugar de $0$ a $180$
+(C\'{o}digo~\ref{lst:servo_knob}). Esto se hizo para que cuando el knob est\'{e} en la
+mitad su valor sea $-90$, y al multiplicarlo por $-1$ antes de mandarlo al servo queda en
+$90^\circ$, que es justo lo que pide el enunciado. En \texttt{dibujarServo()} se dibuja
+una l\'{i}nea que rota igual que el brazo del servo f\'{i}sico.
+
+\begin{lstlisting}[language=Java,
+    caption={Knob del servo y su control en \texttt{draw()}.},
+    label={lst:servo_knob}]
+// setup():
+cp5.addKnob("Servo").setPosition(500, 60).setRadius(30).setRange(-180, 0);
+
+// draw():
+int anguloServo = (int)cp5.getController("Servo").getValue();
+arduino.servoWrite(servoPin, -1 * anguloServo);
+dibujarServo(anguloServo);
+\end{lstlisting}
+
+\begin{lstlisting}[language=Java,
+    caption={Representaci\'{o}n visual del brazo del servo en la interfaz.},
+    label={lst:servo_draw}]
+void dibujarServo(int angulo) {
+    pushMatrix();
+    translate(450, 90);
+    rotate(radians(angulo));
+    stroke(0, 255, 0);
+    strokeWeight(4);
+    line(0, 0, 40, 0);
+    fill(100);
+    ellipse(0, 0, 15, 15);
+    popMatrix();
+}
+\end{lstlisting}
+
+La Figura~\ref{fig:resultado_act3_servo} muestra la interfaz con el knob girado y el brazo
+virtual en la posici\'{o}n correspondiente. El servo f\'{i}sico respondi\'{o} al mismo
+\'{a}ngulo en tiempo real.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/resultado_act3_servo.png}
+    \caption{Interfaz con el knob activo y el servo respondiendo al mismo \'{a}ngulo.}
+    \label{fig:resultado_act3_servo}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusiones}
-xd
+Con estas actividades se pudo ver c\'{o}mo Firmata simplifica mucho el trabajo, ya que no
+hay que reprogramar el Arduino cada vez que se quiere cambiar algo en la l\'{o}gica del
+programa. Toda la parte de control queda en Processing y la placa solo obedece lo que
+se le manda por serial.
+
+En la actividad 5.2 se comprob\'{o} que mezclar colores en el LED RGB es directamente
+proporcional al valor PWM de cada canal. El detalle de usar el alfa del color en los LEDs
+virtuales funcion\'{o} bien para representar el brillo en pantalla de la misma forma que
+en el f\'{i}sico.
+
+En la actividad 5.4 el truco del rango negativo en el knob ($-180$ a $0$) fue lo que
+permiti\'{o} cumplir el requisito de que el centro coincida con $90^\circ$ en el servo,
+simplemente negando el valor antes de mandarlo con \texttt{servoWrite()}~\cite{arduinoref}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begingroup
 \small
 \begin{thebibliography}{9}
 
-\bibitem{unoboard}
-Arduino, ``Arduino UNO Rev3 --- Datasheet and Schematics,''
-\emph{Arduino Hardware Documentation}, Arduino LLC, Ivrea, Italia, 2023.
-[En línea]. Disponible: \url{https://docs.arduino.cc/hardware/uno-rev3}.
+\bibitem{firmata}
+F.~Mellis, H.~Barragan y otros, ``Firmata Protocol Documentation,''
+\emph{Firmata GitHub Repository}, 2006--2024.
+[En l\'{i}nea]. Disponible: \url{https://github.com/firmata/protocol}.
 [Consulta: jun.~2026]
+
+\bibitem{arduinoref}
+Arduino, ``Arduino Language Reference,'' \emph{Arduino Documentation},
+Arduino LLC, 2024. [En l\'{i}nea]. Disponible:
+\url{https://docs.arduino.cc/language-reference/}. [Consulta: jun.~2026]
+
+\bibitem{controlp5}
+A.~Cockpit, ``controlP5 --- A GUI Library for Processing,'' 2012--2023.
+[En l\'{i}nea]. Disponible: \url{https://www.sojamo.de/libraries/controlP5/}.
+[Consulta: jun.~2026]
+
+\bibitem{guialab}
+A.~Russoniello, ``Laboratorio: Interfaz Gr\'{a}fica con Processing y Protocolo Firmata,''
+gu\'{i}a de pr\'{a}ctica de laboratorio, Laboratorio General (Internet de las Cosas),
+Escuela de Computaci\'{o}n, Facultad de Ciencias,
+Universidad Central de Venezuela, Caracas, 2026.
 
 \end{thebibliography}
 \endgroup
