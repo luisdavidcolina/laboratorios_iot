@@ -53,7 +53,7 @@ Para cargarlo, en el IDE se seleccionó \emph{Archivo} $\to$ \emph{Ejemplos} $\t
 queda escuchando comandos por el puerto serial y Processing puede
 comunicarse con \'{e}l directamente.
 
-\pagebreak
+\clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actividad 5.2: Control de LED RGB desde Processing}
 \textit{Enunciado: Construya una interfaz de usuario, utilizando Processing, que permita
@@ -81,6 +81,7 @@ Figura~\ref{fig:diseno_act1} y el montaje armado en la Figura~\ref{fig:circuito_
     \label{fig:circuito_act1}
 \end{figure}
 
+\pagebreak
 La interfaz se hizo en Processing usando las librer\'{i}as \texttt{controlP5} (para los
 controles de la pantalla) y \texttt{cc.arduino} (para hablar con la placa por Firmata).
 Lo primero fue declarar los pines y configurarlos como salida
@@ -88,7 +89,8 @@ Lo primero fue declarar los pines y configurarlos como salida
 
 \begin{lstlisting}[language=Java,
     caption={Declaraci\'{o}n de pines y configuraci\'{o}n en \texttt{setup()}.},
-    label={lst:pin_setup}]
+    label={lst:pin_setup}, 
+    float=ht!]
 int ledRojo = 3;
 int ledVerde = 6;
 int ledAzul  = 5;
@@ -105,7 +107,8 @@ gr\'{a}fico de l\'{i}nea para mostrar el historial de intensidad.
 
 \begin{lstlisting}[language=Java,
     caption={Creaci\'{o}n de sliders y gr\'{a}fico en \texttt{setup()}.},
-    label={lst:sliders}]
+    label={lst:sliders}, 
+    float=ht!]
 cp5.addSlider("slider1").setPosition(50,  50).setRange(0, 255).setSize(150, 20);
 cp5.addSlider("slider2").setPosition(50, 110).setRange(0, 255).setSize(150, 20);
 cp5.addSlider("slider3").setPosition(50, 170).setRange(0, 255).setSize(150, 20);
@@ -117,6 +120,7 @@ myChart1.addDataSet("incoming");
 myChart1.setData("incoming", new float[100]);
 \end{lstlisting}
 
+\pagebreak
 En \texttt{draw()} se lee el valor de cada slider y se manda al pin correspondiente con
 \texttt{analogWrite()}. Tambi\'{e}n se llama a \texttt{dibujarLED()} para mostrar en
 pantalla el estado del LED, y se actualiza el gr\'{a}fico cada 5 frames para que no sea
@@ -127,7 +131,8 @@ el valor del slider, igual que el LED f\'{i}sico (C\'{o}digo~\ref{lst:led_draw})
 \begin{lstlisting}[language=Java,
     caption={Lectura de sliders, escritura en pines y actualizaci\'{o}n visual en
     \texttt{draw()}.},
-    label={lst:draw_rgb}]
+    label={lst:draw_rgb}, 
+    float=ht!]
 int valorSlider1 = (int)cp5.getController("slider1").getValue();
 int valorSlider2 = (int)cp5.getController("slider2").getValue();
 int valorSlider3 = (int)cp5.getController("slider3").getValue();
@@ -146,7 +151,8 @@ if (frameCount % 5 == 0)
 
 \begin{lstlisting}[language=Java,
     caption={Funci\'{o}n para dibujar el LED virtual en pantalla.},
-    label={lst:led_draw}]
+    label={lst:led_draw}, 
+    float=ht!]
 void dibujarLED(int x, int y, color c, int val) {
     fill(red(c), green(c), blue(c), val);
     noStroke();
@@ -162,7 +168,8 @@ canales y la fotorresistencia (C\'{o}digo~\ref{lst:panel_valores}).
 
 \begin{lstlisting}[language=Java,
     caption={Panel de valores en tiempo real.},
-    label={lst:panel_valores}]
+    label={lst:panel_valores},
+    float=ht!]
 void dibujarVentanaValores(int x, int y, int w, int h) {
     fill(0, 0, 0, 150);
     stroke(255, 100);
@@ -197,12 +204,85 @@ se le estaba mandando desde la interfaz.
     \label{fig:resultado_act1_led}
 \end{figure}
 
-\pagebreak
+\clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actividad 5.3: Lectura de fotorresistencia}
-\textit{Agregue al código anterior una opción que lea valores de una foto-resistencia.}
+\textit{Enunciado: Agregue al código anterior una opción que lea valores de una 
+foto-resistencia. Muestre, en la interfaz, un nuevo componente tipo led monocromático y modifique su valor en función 
+de la intensidad de la fotoresistencia. Implemente, en la misma interfaz, un componente que 
+muestre los valores de intensidad de la foto-resistencia. Agregue un componente gráfico que 
+muestre la intensidad del fotoresistor.}
+
+Para esta actividad, se incorporó una fotoresistencia al circuito que ya se venía trabajando. Se armó un divisor de tensión básico: conectamos una pata del componente a los 5V y la otra al pin analógico A0 del Arduino, colocando también una resistencia de protección que va hacia tierra (GND). De esta forma, podemos medir cómo cambia el voltaje dependiendo de la cantidad de luz que recibe el sensor. El diseño del circuito en Fritzing se puede ver en la Figura~\ref{fig:diseno_act2}, y el montaje real armado en el protoboard se muestra en la Figura~\ref{fig:circuito_act2}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/diseno_act2.png}
+    \caption{Dise\~{n}o del circuito para la fotoresistencia en Fritzing.}
+    \label{fig:diseno_act2}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/circuito_act2.jpg}
+    \caption{Montaje f\'{i}sico de la fotoresistencia sobre el protoboard.}
+    \label{fig:circuito_act2}
+\end{figure}
 
 \pagebreak
+En el código de Processing, se agregaron los nuevos elementos para la interfaz. En la función \texttt{setup()}, se creó un nuevo gráfico (\texttt{Chart}) para ir dibujando la línea con los valores de la luz en el tiempo, ajustando su tamaño y color para que combine con el resto de la pantalla (C\'{o}digo~\ref{lst:grafica_fotoresistencia}).
+
+\begin{lstlisting}[language=Java,
+    caption={Creación del gráfico para la fotorresistencia en \texttt{setup()}.},
+    label={lst:grafica_fotoresistencia}, 
+    float=ht!]
+
+// --- Graficar valor de la Fotoresistencia ---
+myChart2 = cp5.addChart("fotoresistencia")
+              .setPosition(50, 350)
+              .setSize(200, 100)
+              .setRange(0, 200)
+              .setView(Chart.LINE)
+              .setStrokeWeight(1.5)
+              .setColorCaptionLabel(color(40));
+
+myChart2.addDataSet("incoming2");
+myChart2.setData("incoming2", new float[100]);
+\end{lstlisting}
+
+\pagebreak
+Luego, dentro de la función \texttt{draw()}, usamos \texttt{arduino.analogRead(0)} para leer el valor del pin \texttt{A0} a través de Firmata. Este se utiliza para tres cosas en la interfaz: mostrar el valor numérico en el panel de texto, enviarlo al gráfico inferior para actualizar la línea, y cambiar el nivel de transparencia de un nuevo LED virtual dibujado en pantalla (C\'{o}digo~\ref{lst:lectura_pin}).
+
+\begin{lstlisting}[language=Java,
+    caption={Lectura del pin A0 y actualización de la interfaz en \texttt{draw()}.},
+    label={lst:lectura_pin}, 
+    float=ht!]
+
+float valorFotoresistencia = arduino.analogRead(0);
+
+if (frameCount % 5 == 0) { 
+    myChart2.push("incoming2", valorFotoresistencia);
+}
+
+dibujarLED(260, 240, color(0, 255, 0), (int)valorFotoresistencia);
+
+\end{lstlisting}
+
+Cuando la fotoresistencia recibe la iluminación normal del cuarto, el valor se mantiene estable. Para probar que la interfaz responde correctamente, tapamos el sensor físico con el dedo para bloquear la luz, como se observa en la Figura~\ref{fig:resultado_act2_fotoresistencia}. Al hacer esto, el valor de voltaje que lee el pin A0 baja rápidamente. Esto se refleja al instante en Processing: la línea del gráfico inferior cae de golpe, el número en pantalla disminuye (llegando a 11.0) y el LED virtual verde se vuelve más opaco (Figura~\ref{fig:resultado_act2_interfaz}).
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.4\linewidth]{img/resultado_act2_fotoresistencia.jpg}
+    \caption{Bloqueo de luz en el sensor físico.}
+    \label{fig:resultado_act2_fotoresistencia}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/resultado_act2_interfaz.png}
+    \caption{Interfaz con gráfica de la fotoresistencia.}
+    \label{fig:resultado_act2_interfaz}
+\end{figure}
+
+\clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actividad 5.4: Control de servo motor}
 \textit{Enunciado: Modifique el c\'{o}digo anterior, agregue una opci\'{o}n para controlar
@@ -229,18 +309,21 @@ en la Figura~\ref{fig:circuito_act3}.
     \label{fig:circuito_act3}
 \end{figure}
 
+\pagebreak
 El pin 10 se configur\'{o} con \texttt{Arduino.SERVO} para que Firmata sepa que tiene que
 manejar ese pin como servo y no como salida digital normal
 (C\'{o}digo~\ref{lst:servo_setup}):
 
 \begin{lstlisting}[language=Java,
     caption={Declaraci\'{o}n y configuraci\'{o}n del pin del servo.},
-    label={lst:servo_setup}]
+    label={lst:servo_setup}, 
+    float=ht!]
 int servoPin = 10;
 ...
 arduino.pinMode(servoPin, Arduino.SERVO);
 \end{lstlisting}
 
+\pagebreak
 Para el knob se us\'{o} un rango de $-180$ a $0$ en lugar de $0$ a $180$
 (C\'{o}digo~\ref{lst:servo_knob}). Esto se hizo para que cuando el knob est\'{e} en la
 mitad su valor sea $-90$, y al multiplicarlo por $-1$ antes de mandarlo al servo queda en
@@ -249,7 +332,8 @@ una l\'{i}nea que rota igual que el brazo del servo f\'{i}sico.
 
 \begin{lstlisting}[language=Java,
     caption={Knob del servo y su control en \texttt{draw()}.},
-    label={lst:servo_knob}]
+    label={lst:servo_knob}, 
+    float=ht!]
 // setup():
 cp5.addKnob("Servo").setPosition(500, 60).setRadius(30).setRange(-180, 0);
 
@@ -261,7 +345,8 @@ dibujarServo(anguloServo);
 
 \begin{lstlisting}[language=Java,
     caption={Representaci\'{o}n visual del brazo del servo en la interfaz.},
-    label={lst:servo_draw}]
+    label={lst:servo_draw}, 
+    float=ht!]
 void dibujarServo(int angulo) {
     pushMatrix();
     translate(450, 90);
@@ -275,6 +360,7 @@ void dibujarServo(int angulo) {
 }
 \end{lstlisting}
 
+\pagebreak
 La Figura~\ref{fig:resultado_act3_servo} muestra la interfaz con el knob girado y el brazo
 virtual en la posici\'{o}n correspondiente. El servo f\'{i}sico respondi\'{o} al mismo
 \'{a}ngulo en tiempo real.
@@ -286,7 +372,7 @@ virtual en la posici\'{o}n correspondiente. El servo f\'{i}sico respondi\'{o} al
     \label{fig:resultado_act3_servo}
 \end{figure}
 
-\pagebreak
+\clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusiones}
 Con estas actividades se pudo ver c\'{o}mo Firmata simplifica mucho el trabajo, ya que no
@@ -299,11 +385,16 @@ proporcional al valor PWM de cada canal. El detalle de usar el alfa del color en
 virtuales funcion\'{o} bien para representar el brillo en pantalla de la misma forma que
 en el f\'{i}sico.
 
+En la actividad 5.3 se validó que la interfaz responde dinámicamente a los cambios del 
+entorno. Al bloquear la luz sobre la fotorresistencia, la caída de valores en el gráfico 
+y el cambio en la opacidad del LED virtual demostraron que se pueden procesar señales 
+analógicas complejas de forma visual e intuitiva.
+
 En la actividad 5.4 el truco del rango negativo en el knob ($-180$ a $0$) fue lo que
 permiti\'{o} cumplir el requisito de que el centro coincida con $90^\circ$ en el servo,
 simplemente negando el valor antes de mandarlo con \texttt{servoWrite()}~\cite{arduinoref}.
 
-\pagebreak
+\clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begingroup
 \small
