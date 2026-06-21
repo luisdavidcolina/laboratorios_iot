@@ -48,11 +48,13 @@ secci\'{o}n de ejemplos del IDE de Arduino.}
 
 Firmata es un protocolo que permite controlar los pines del Arduino desde un programa
 externo en el computador sin tener que reprogramar la placa cada vez~\cite{firmata}.
-Para cargarlo, se fue a \emph{Archivo} $\to$ \emph{Ejemplos} $\to$ \emph{Firmata} $\to$
-\texttt{StandardFirmata} en el IDE y se subi\'{o} a la placa por USB. Con eso el Arduino
-queda escuchando comandos por el puerto serie a 57\,600~baud y Processing puede
+Para cargarlo, en el IDE se seleccionó \emph{Archivo} $\to$ \emph{Ejemplos} $\to$ \emph{Firmata} $\to$
+\emph{StandardFirmata} y se subi\'{o} a la placa por USB. Con eso el Arduino
+queda escuchando comandos por el puerto serial y Processing puede
 comunicarse con \'{e}l directamente.
 
+\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actividad 5.2: Control de LED RGB desde Processing}
 \textit{Enunciado: Construya una interfaz de usuario, utilizando Processing, que permita
 controlar la intensidad y el color de un led RGB conectado a la placa, los controles deben
@@ -79,7 +81,6 @@ Figura~\ref{fig:diseno_act1} y el montaje armado en la Figura~\ref{fig:circuito_
     \label{fig:circuito_act1}
 \end{figure}
 
-\pagebreak
 La interfaz se hizo en Processing usando las librer\'{i}as \texttt{controlP5} (para los
 controles de la pantalla) y \texttt{cc.arduino} (para hablar con la placa por Firmata).
 Lo primero fue declarar los pines y configurarlos como salida
@@ -98,7 +99,7 @@ arduino.pinMode(ledVerde, Arduino.OUTPUT);
 arduino.pinMode(ledAzul,  Arduino.OUTPUT);
 \end{lstlisting}
 
-Los tres sliders se crearon con \texttt{cp5.addSlider()} con rango de 0 a 255, que es el
+Los tres sliders se crearon usando \texttt{cp5.addSlider()} con rango de 0 a 255, que es el
 rango del PWM en 8 bits (C\'{o}digo~\ref{lst:sliders}). Tambi\'{e}n se agreg\'{o} un
 gr\'{a}fico de l\'{i}nea para mostrar el historial de intensidad.
 
@@ -196,11 +197,12 @@ se le estaba mandando desde la interfaz.
     \label{fig:resultado_act1_led}
 \end{figure}
 
+\pagebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actividad 5.3: Lectura de fotorresistencia}
-\textit{Esta secci\'{o}n corresponde a la participante Samantha Ram\'{i}rez y est\'{a}
-pendiente de desarrollo.}
+\textit{Agregue al código anterior una opción que lea valores de una foto-resistencia.}
 
+\pagebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actividad 5.4: Control de servo motor}
 \textit{Enunciado: Modifique el c\'{o}digo anterior, agregue una opci\'{o}n para controlar
@@ -208,7 +210,7 @@ un servo motor. Muestre un control de tipo \emph{knob} que indique el desplazami
 grados del brazo del servo. Al encontrarse el control en su valor medio, el servo debe
 estar a $90^\circ$.}
 
-Se agreg\'{o} un servo motor al circuito connect\'{a}ndolo al pin digital 10. En modo
+Se agreg\'{o} un servo motor al circuito connect\'{a}ndolo al pin digital 10. Con
 Firmata, al configurar un pin como servo, la placa genera autom\'{a}ticamente la se\~{n}al
 de posicionamiento sin que Processing tenga que hacer nada extra~\cite{firmata}. El
 dise\~{n}o del circuito est\'{a} en la Figura~\ref{fig:diseno_act3} y el montaje f\'{i}sico
@@ -227,7 +229,6 @@ en la Figura~\ref{fig:circuito_act3}.
     \label{fig:circuito_act3}
 \end{figure}
 
-\pagebreak
 El pin 10 se configur\'{o} con \texttt{Arduino.SERVO} para que Firmata sepa que tiene que
 manejar ese pin como servo y no como salida digital normal
 (C\'{o}digo~\ref{lst:servo_setup}):
@@ -280,11 +281,12 @@ virtual en la posici\'{o}n correspondiente. El servo f\'{i}sico respondi\'{o} al
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.8\linewidth]{img/resultado_act3_servo.png}
+    \includegraphics[width=0.4\linewidth]{img/resultado_act3_servo.png}
     \caption{Interfaz con el knob activo y el servo respondiendo al mismo \'{a}ngulo.}
     \label{fig:resultado_act3_servo}
 \end{figure}
 
+\pagebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusiones}
 Con estas actividades se pudo ver c\'{o}mo Firmata simplifica mucho el trabajo, ya que no
@@ -301,6 +303,7 @@ En la actividad 5.4 el truco del rango negativo en el knob ($-180$ a $0$) fue lo
 permiti\'{o} cumplir el requisito de que el centro coincida con $90^\circ$ en el servo,
 simplemente negando el valor antes de mandarlo con \texttt{servoWrite()}~\cite{arduinoref}.
 
+\pagebreak
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begingroup
 \small
