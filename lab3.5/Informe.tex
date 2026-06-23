@@ -1,0 +1,379 @@
+% !TeX spellcheck = es_VE
+% !TeX root = Informe.tex
+\input{../templates/plantilla_base.tex}
+\usepackage[T1]{fontenc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{fancy}
+\fancyhf{}
+
+\setlength{\headheight}{80pt}
+\addtolength{\topmargin}{-35pt}
+\setlength{\headsep}{1cm}
+\setlength{\footskip}{20pt}
+
+\rhead{\includegraphics[width=1.3cm]{../img/logo_ciencias.png}}
+\lhead{\includegraphics[width=1.4cm]{../img/logo_ucv.png}}
+\cfoot{\thepage}
+\rfoot{Junio, 2026}
+
+\chead{Laboratorio de Internet de las Cosas}
+\newcommand{\titulo}{LABORATORIO 3.5}
+\newcommand{\subtitulo}{Comunicaci\'{o}n TCP y Control Remoto con Processing}
+\newcommand{\autorUno}{Luisdavid Colina V24766381}
+\newcommand{\autorDos}{Samantha Ram\'{i}rez V31307714}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+  {\Large \textbf{\titulo}} \\[0.3cm]
+  {\large \textbf{\subtitulo}} \\[0.8cm]
+
+  \small
+  \begin{tabular}{c}
+    \textbf{Preparado por:} \\
+    \autorUno \\
+    \autorDos \\
+  \end{tabular}
+  \\[1cm]
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Desarrollo de actividades}
+
+\subsection{Actividad 6.1: Interfaz unificada con joystick y servomotor}
+\textit{Enunciado: Desarrolle una aplicaci\'{o}n en Processing que integre la lectura f\'{i}sica
+de un m\'{o}dulo joystick analógico con el control de un servomotor. El eje que presente mayor
+desviaci\'{o}n respecto al centro de reposo debe ser el eje dominante y controlar el servo:
+el eje X mapear\'{a} \'{a}ngulos de $0^\circ$ a $90^\circ$ y el eje Y de $90^\circ$ a $180^\circ$.
+La interfaz gr\'{a}fica debe mostrar los valores ADC de cada eje, el estado del pulsador y una
+representaci\'{o}n visual din\'{a}mica del brazo del servo.}
+
+El joystick KY-023 expone tres se\~{n}ales: dos an\'{a}logas de posici\'{o}n (VRX y VRY) y
+un pulsador digital (SW). Las dos primeras se conectaron a las entradas anal\'{o}gicas
+\texttt{A0} y \texttt{A1} respectivamente, y el pulsador al pin digital~2. Para el
+pulsador se activ\'{o} la resistencia \emph{pullup} interna, de modo que su valor en reposo
+es \texttt{HIGH} y pasa a \texttt{LOW} al presionarlo. El servo se conect\'{o} al pin~3,
+que Firmata gestiona como salida de posicionamiento autom\'{a}tico~\cite{firmata}.
+
+La declaraci\'{o}n de pines y la configuraci\'{o}n del hardware en \texttt{setup()} se muestra
+en el C\'{o}digo~\ref{lst:uni_setup}:
+
+\begin{lstlisting}[language=Java,
+    caption={Declaraci\'{o}n de pines y configuraci\'{o}n en \texttt{setup()} del sketch unificado.},
+    label={lst:uni_setup},
+    float=ht!]
+int pinVRX = 0;   // Entrada analogica A0 (Controla 0 a 90 grados)
+int pinVRY = 1;   // Entrada analogica A1 (Controla 90 a 180 grados)
+int pinSW  = 2;   // Entrada digital Pin 2 (Pulsador)
+int servoPin = 3; // Pin de control del servo motor
+
+arduino = new Arduino(this, Arduino.list()[2], 57600);
+arduino.pinMode(pinSW, Arduino.INPUT);
+arduino.digitalWrite(pinSW, Arduino.HIGH); // Activar pullup interno
+arduino.pinMode(servoPin, Arduino.SERVO);
+arduino.servoWrite(servoPin, 90);          // Posicion inicial segura
+\end{lstlisting}
+
+\pagebreak
+Dentro de \texttt{draw()}, primero se leen los tres valores del hardware. Luego se aplica
+la \emph{l\'{o}gica de eje dominante}: se compara cu\'{a}l de los dos ejes se aleja m\'{a}s
+del valor central de reposo (512 en un ADC de 10~bits) y se usa ese eje para calcular el
+\'{a}ngulo. Si el eje~X domina, el valor ADC se mapea al rango $[0^\circ,\,90^\circ]$;
+si domina el eje~Y, al rango $[90^\circ,\,180^\circ]$ (C\'{o}digo~\ref{lst:uni_mapeo}).
+Esto impide que ambos ejes interfieran entre s\'{i} y que el servo reciba \'{o}rdenes
+contradictorias.
+
+\begin{lstlisting}[language=Java,
+    caption={Lectura del joystick y l\'{o}gica de eje dominante en \texttt{draw()}.},
+    label={lst:uni_mapeo},
+    float=ht!]
+valorX   = arduino.analogRead(pinVRX);
+valorY   = arduino.analogRead(pinVRY);
+estadoSW = arduino.digitalRead(pinSW);
+
+if (abs(valorX - 512) > abs(valorY - 512)) {
+    // Eje X domina: rango 0 a 90 grados
+    anguloServo = (int) map(valorX, 0, 1023, 0, 90);
+} else {
+    // Eje Y domina: rango 90 a 180 grados
+    anguloServo = (int) map(valorY, 0, 1023, 90, 180);
+}
+arduino.servoWrite(servoPin, anguloServo);
+\end{lstlisting}
+
+La interfaz gr\'{a}fica muestra en pantalla los valores ADC de cada eje, el estado del
+pulsador y un panel que contiene la representaci\'{o}n visual del brazo del servo.
+La funci\'{o}n \texttt{dibujarServoGrafico()} centra la transformaci\'{o}n en el punto de
+pivote, rota la l\'{i}nea del brazo y dibuja el eje central como una elipse
+(C\'{o}digo~\ref{lst:uni_grafico}). El ajuste de $-90^\circ$ en la rotaci\'{o}n se debe a
+que en el sistema de coordenadas de Processing $0^\circ$ apunta hacia la derecha, mientras
+que visualmente se desea que $90^\circ$ apunte hacia arriba.
+
+\begin{lstlisting}[language=Java,
+    caption={Funci\'{o}n auxiliar para dibujar el brazo del servo en pantalla.},
+    label={lst:uni_grafico},
+    float=ht!]
+void dibujarServoGrafico(int x, int y, int angulo) {
+    pushMatrix();
+    translate(x, y);
+    rotate(radians(angulo - 90)); // 90 deg apunta arriba en pantalla
+    stroke(0, 255, 100);
+    strokeWeight(6);
+    line(0, 0, 0, -50);     // Brazo mecanico
+    fill(255);
+    noStroke();
+    ellipse(0, 0, 15, 15);  // Eje central circular
+    popMatrix();
+}
+\end{lstlisting}
+
+La llamada a \texttt{delay(20)} al final de \texttt{draw()} introduce una pausa breve para
+estabilizar la tasa de actualizaci\'{o}n del bus Firmata y evitar que lecturas demasiado
+r\'{a}pidas saturen la comunicaci\'{o}n serial~\cite{firmata}.
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.2: Servidor de control remoto por socket TCP}
+\textit{Enunciado: Implemente un sketch de Processing que act\'{u}e como servidor TCP.
+El servidor debe recibir comandos de \'{a}ngulo enviados desde un cliente remoto y retransmitirlos
+al servo f\'{i}sico. Se debe validar el rango del valor recibido antes de aplicarlo al hardware.}
+
+Processing incluye la librer\'{i}a nativa \texttt{processing.net} que permite crear servidores
+y clientes TCP sin dependencias externas~\cite{procnet}. En el servidor se crea un objeto
+\texttt{Server} escuchando en el puerto~12345 (C\'{o}digo~\ref{lst:srv_setup}). El servo
+se configura igual que en la actividad anterior: pin~3 en modo \texttt{Arduino.SERVO}
+con posici\'{o}n inicial de $90^\circ$.
+
+\begin{lstlisting}[language=Java,
+    caption={Inicializaci\'{o}n del servidor TCP y del servo en \texttt{setup()}.},
+    label={lst:srv_setup},
+    float=ht!]
+import processing.serial.*;
+import processing.net.*;
+import cc.arduino.*;
+
+Arduino arduino;
+Server miServidor;
+int servoPin   = 3;
+int anguloServo = 90;
+
+arduino = new Arduino(this, Arduino.list()[2], 57600);
+arduino.pinMode(servoPin, Arduino.SERVO);
+arduino.servoWrite(servoPin, anguloServo);
+
+miServidor = new Server(this, 12345);
+\end{lstlisting}
+
+\pagebreak
+En \texttt{draw()}, el servidor consulta si hay algún cliente con datos disponibles mediante
+\texttt{miServidor.available()}. Si hay datos, se lee la cadena hasta el car\'{a}cter
+delimitador \texttt{'\textbackslash n'} que el cliente agrega al final de cada comando. El
+uso de ese delimitador es importante porque TCP es un protocolo de flujo de bytes sin
+bordes de mensaje: sin él no habr\'{i}a forma confiable de saber d\'{o}nde termina un
+valor y d\'{o}nde empieza el siguiente (C\'{o}digo~\ref{lst:srv_draw}).
+
+\begin{lstlisting}[language=Java,
+    caption={Recepci\'{o}n, validaci\'{o}n y aplicaci\'{o}n del \'{a}ngulo en \texttt{draw()}.},
+    label={lst:srv_draw},
+    float=ht!]
+Client clienteEntrante = miServidor.available();
+
+if (clienteEntrante != null) {
+    String cadena = clienteEntrante.readStringUntil('\n');
+
+    if (cadena != null) {
+        cadena = trim(cadena);
+        try {
+            int nuevoAngulo = int(cadena);
+            if (nuevoAngulo >= 0 && nuevoAngulo <= 180) {
+                anguloServo = nuevoAngulo;
+                arduino.servoWrite(servoPin, anguloServo);
+            }
+        } catch (Exception e) {
+            println("Error de trama: " + e.getMessage());
+        }
+    }
+}
+\end{lstlisting}
+
+La validaci\'{o}n del rango $[0,\,180]$ antes de llamar a \texttt{servoWrite()} es una
+protecci\'{o}n de hardware: valores fuera de ese rango pueden da\~{n}ar mec\'{a}nicamente
+el servo o generar una se\~{n}al PWM incorrecta. La interfaz visual del servidor muestra en
+pantalla el \'{u}ltimo \'{a}ngulo recibido, lo que facilita la depuraci\'{o}n sin necesidad
+de abrir la consola.
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.3: Cliente remoto con interfaz gr\'{a}fica ControlP5}
+\textit{Enunciado: Desarrolle un cliente TCP en Processing que permita controlar remotamente
+el servo del servidor. La interfaz debe incluir sliders, knobs y una representaci\'{o}n gr\'{a}fica
+del servo. Solo el knob de servo debe transmitir datos al servidor; los sliders operan de forma
+puramente visual.}
+
+El cliente importa \texttt{controlP5} para los controles de interfaz y \texttt{processing.net}
+para la conexi\'{o}n TCP. Al inicio, se crea un objeto \texttt{Client} apuntando a la direcci\'{o}n
+IP del equipo servidor y al puerto expuesto a trav\'{e}s del reenv\'{i}o de puertos de la red
+local (C\'{o}digo~\ref{lst:cli_setup}).
+
+\begin{lstlisting}[language=Java,
+    caption={Creaci\'{o}n del cliente TCP y los controles en \texttt{setup()}.},
+    label={lst:cli_setup},
+    float=ht!]
+import controlP5.*;
+import processing.net.*;
+
+Client miCliente;
+ControlP5 cp5;
+int anguloActual = 0;
+
+// IP del equipo con el Arduino. Puerto: 8080 (redirigido al 12345 del servidor)
+miCliente = new Client(this, "190.169.74.67", 8080);
+
+cp5.addSlider("slider1").setPosition(50,  50).setRange(0, 255).setSize(150, 20);
+cp5.addSlider("slider2").setPosition(50, 110).setRange(0, 255).setSize(150, 20);
+cp5.addSlider("slider3").setPosition(50, 170).setRange(0, 255).setSize(150, 20);
+
+cp5.addKnob("Servo").setPosition(500, 60).setRadius(30).setRange(0, 180).setValue(90);
+cp5.addKnob("knob2").setPosition(500, 150).setRadius(30).setRange(0, 255);
+cp5.addKnob("knob3").setPosition(500, 240).setRadius(30).setRange(0, 255);
+\end{lstlisting}
+
+El cliente conecta al puerto~8080 de la IP p\'{u}blica mientras el servidor escucha en el
+puerto~12345 localmente. Esto refleja un escenario real de IoT donde el router de la red
+donde est\'{a} el servidor redirige (NAT~\emph{port~forwarding}) el tr\'{a}fico externo del
+puerto~8080 al puerto~12345 de la m\'{a}quina interna con el Arduino.
+
+\pagebreak
+La transmisi\'{o}n al servidor se produce \'{u}nicamente a trav\'{e}s del callback
+\texttt{controlEvent()}, que se invoca autom\'{a}ticamente por ControlP5 cada vez que el
+usuario mueve un control. Solo el knob llamado \texttt{"Servo"} genera tr\'{a}fico de red;
+el resto de los controles son exclusivamente visuales en esta implementaci\'{o}n
+(C\'{o}digo~\ref{lst:cli_event}).
+
+\begin{lstlisting}[language=Java,
+    caption={Envío del \'{a}ngulo al servidor en \texttt{controlEvent()}.},
+    label={lst:cli_event},
+    float=ht!]
+void controlEvent(ControlEvent elEvento) {
+    if (elEvento.isController()) {
+        if (elEvento.getController().getName().equals("Servo")) {
+            anguloActual = (int)elEvento.getController().getValue();
+            if (miCliente.active()) {
+                miCliente.write(anguloActual + "\n");
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+El valor se env\'{i}a como cadena de texto seguida del car\'{a}cter \texttt{'\textbackslash n'},
+que es el mismo delimitador que el servidor espera. La comprobaci\'{o}n de
+\texttt{miCliente.active()} evita que el programa lance una excepci\'{o}n si la conexi\'{o}n
+se interrumpe.
+
+En \texttt{draw()} se renderizan los LEDs virtuales mediante la funci\'{o}n
+\texttt{dibujarLED()}, que usa el canal alfa del color para simular el brillo relativo de cada
+canal RGB, y se llama a \texttt{dibujarServo()} para animar el brazo en pantalla con el
+\'{a}ngulo actual (C\'{o}digo~\ref{lst:cli_draw}).
+
+\begin{lstlisting}[language=Java,
+    caption={Renderizado de LEDs virtuales y brazo del servo en \texttt{draw()}.},
+    label={lst:cli_draw},
+    float=ht!]
+void draw() {
+    background(30);
+    int val1 = (int)cp5.getController("slider1").getValue();
+    int val2 = (int)cp5.getController("slider2").getValue();
+    int val3 = (int)cp5.getController("slider3").getValue();
+
+    dibujarLED(260,  60, color(255, 0,   0), val1);
+    dibujarLED(260, 120, color(0,   255, 0), val2);
+    dibujarLED(260, 180, color(0,   0, 255), val3);
+    dibujarServo(anguloActual);
+}
+
+void dibujarLED(int x, int y, color c, int val) {
+    fill(red(c), green(c), blue(c), val);
+    noStroke();
+    ellipse(x, y, 40, 40);
+}
+
+void dibujarServo(int angulo) {
+    pushMatrix();
+    translate(450, 90);
+    rotate(radians(angulo));
+    stroke(0, 255, 0);
+    strokeWeight(4);
+    line(0, 0, 40, 0);
+    fill(100);
+    ellipse(0, 0, 15, 15);
+    popMatrix();
+}
+\end{lstlisting}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusiones}
+
+En este laboratorio se exploró c\'{o}mo extender el control de hardware desde una interfaz
+local hacia una arquitectura cliente--servidor distribuida mediante sockets TCP.
+
+En la actividad~6.1 se comprobó que la lógica de eje dominante resuelve de forma limpia el
+problema de la interferencia entre los dos ejes del joystick. Al comparar la desviaci\'{o}n
+absoluta respecto al centro ($|x - 512|$ vs.\ $|y - 512|$), solo el eje con mayor movimiento
+tiene efecto sobre el servo, lo que hace el control intuitivo y predecible sin necesidad de
+zonas muertas adicionales.
+
+En la actividad~6.2 se confirm\'{o} que TCP, al ser orientado a conexi\'{o}n, garantiza la
+entrega ordenada de los datos, pero no define bordes de mensaje. El uso del car\'{a}cter
+\texttt{'\textbackslash n'} como delimitador junto con \texttt{readStringUntil()} es la
+soluci\'{o}n m\'{a}s simple para reconstruir mensajes completos en el lado receptor. La
+validaci\'{o}n del rango antes de escribir al servo result\'{o} indispensable para la
+integridad del hardware.
+
+En la actividad~6.3 se pudo apreciar la ventaja del callback \texttt{controlEvent()} frente
+a la lectura polin\'{o}mica en \texttt{draw()}: solo se genera tr\'{a}fico de red cuando el
+usuario realmente interact\'{u}a con el knob del servo, en lugar de enviar datos a cada fotograma.
+La diferenciaci\'{o}n entre el puerto externo (8080) y el puerto interno del servidor (12345)
+ilustra un caso t\'{i}pico de despliegue IoT con reenv\'{i}o de puertos en un router NAT.
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begingroup
+\small
+\begin{thebibliography}{9}
+
+\bibitem{firmata}
+F.~Mellis, H.~Barragan y otros, ``Firmata Protocol Documentation,''
+\emph{Firmata GitHub Repository}, 2006--2024.
+[En l\'{i}nea]. Disponible: \url{https://github.com/firmata/protocol}.
+[Consulta: jun.~2026]
+
+\bibitem{procnet}
+The Processing Foundation, ``processing/net --- Network Library,''
+\emph{Processing Reference}, 2001--2024.
+[En l\'{i}nea]. Disponible: \url{https://processing.org/reference/libraries/net/}.
+[Consulta: jun.~2026]
+
+\bibitem{controlp5}
+A.~Cockpit, ``controlP5 --- A GUI Library for Processing,'' 2012--2023.
+[En l\'{i}nea]. Disponible: \url{https://www.sojamo.de/libraries/controlP5/}.
+[Consulta: jun.~2026]
+
+\bibitem{arduinoref}
+Arduino, ``Arduino Language Reference,'' \emph{Arduino Documentation},
+Arduino LLC, 2024. [En l\'{i}nea]. Disponible:
+\url{https://docs.arduino.cc/language-reference/}. [Consulta: jun.~2026]
+
+\bibitem{guialab}
+A.~Russoniello, ``Laboratorio: Comunicaci\'{o}n TCP y Control Remoto con Processing,''
+gu\'{i}a de pr\'{a}ctica de laboratorio, Laboratorio General (Internet de las Cosas),
+Escuela de Computaci\'{o}n, Facultad de Ciencias,
+Universidad Central de Venezuela, Caracas, 2026.
+
+\end{thebibliography}
+\endgroup
+
+\end{document}
