@@ -124,7 +124,7 @@ if (clienteEntrante != null) {
 
 En la Figura~\ref{fig:resultado_act2} se puede ver el servo siendo controlado desde otra máquina
 distinta a la que tenía el Arduino. Otro grupo actuó como consola de control con la
-interfaz gráfica, mientras el hardware respondía en tiempo real
+interfaz gráfica, mientras el hardware respondía en tiempo real.
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.8\linewidth]{img/resultado_act2.jpg}
@@ -138,7 +138,7 @@ interfaz gráfica, mientras el hardware respondía en tiempo real
 \textit{Enunciado: Desarrolle un cliente TCP en Processing que permita controlar remotamente
 el servo del servidor.}
 
-Para actuar como clientes, se usó \texttt{controlP5} para los controles gr\'{a}ficos y \texttt{processing.net}
+En el rol de clientes, se usó \texttt{controlP5} para los controles gr\'{a}ficos y \texttt{processing.net}
 para la conexi\'{o}n TCP. Al arrancar, se creó un objeto \texttt{Client} apuntando a la IP del
 servidor (la IP del otro grupo) y al puerto que el router tenía redirigido (C\'{o}digo~\ref{lst:cli_setup}).
 
@@ -287,8 +287,6 @@ arduino.pinMode(servoPin, Arduino.SERVO);
 arduino.servoWrite(servoPin, 90);          // Posicion inicial segura
 \end{lstlisting}
 
-\pagebreak
-
 Dentro de \texttt{draw()} se leen los tres valores del hardware y luego se compara cu\'{a}l de los dos ejes se aleja m\'{a}s del
 centro de reposo (512 en un ADC de 10~bits) y ese es el que controla el servo. Si gana el
 eje~X, el valor se mapea al rango $[0^\circ,\,90^\circ]$; si gana el eje~Y, al rango
@@ -374,16 +372,13 @@ hacia una arquitectura cliente--servidor usando sockets TCP.
 En la actividad~6.1 quedó claro que TCP entrega los datos en orden y sin pérdidas, pero no
 separa los mensajes por sí solo. Usar \texttt{'\textbackslash n'} como delimitador junto con
 \texttt{readStringUntil()} fue la forma más simple de reconstruir cada comando en el receptor.
-Además, validar el rango antes de escribir al servo resultó clave para no dañar el hardware.
 
-En la actividad~6.2 se vio la ventaja de usar el callback \texttt{controlEvent()} en lugar de
-leer el estado de los controles en cada fotograma de \texttt{draw()}: solo se envían datos por
-red cuando el usuario realmente mueve el knob del servo. 
+En la actividad~6.2 se vio la ventaja de usar el callback \texttt{controlEvent()} para 
+solo se enviar datos por red cuando el usuario realmente mueve el knob del servo. 
 
 En la actividad~6.3 se comprobó que la lógica de eje dominante es una solución sencilla y
-efectiva para el problema de interferencia entre los dos ejes del joystick. Al quedarse solo
-con el eje que más se aleja del centro, el control resulta
-intuitivo y predecible.
+efectiva para el problema de interferencia entre los dos ejes del joystick, quedándose solo
+con el eje que más se aleja del centro.
 
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
