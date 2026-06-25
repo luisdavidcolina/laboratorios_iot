@@ -19,9 +19,9 @@
 
 \chead{Laboratorio de Internet de las Cosas}
 \newcommand{\titulo}{LABORATORIO 3.5}
-\newcommand{\subtitulo}{Comunicaci\'{o}n TCP y Control Remoto con Processing}
+\newcommand{\subtitulo}{Control remoto con sockets y joystick}
 \newcommand{\autorUno}{Luisdavid Colina V24766381}
-\newcommand{\autorDos}{Samantha Ram\'{i}rez V31307714}
+\newcommand{\autorDos}{Samantha Ramírez V31307714}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
@@ -43,13 +43,13 @@
 \section{Desarrollo de actividades}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Actividad 6.1: Servidor de control remoto por socket TCP}
-\textit{Enunciado: Implemente un sketch de Processing que act\'{u}e como servidor TCP.
-El servidor debe recibir comandos de \'{a}ngulo enviados desde un cliente remoto y retransmitirlos
+\subsection{Actividad 6.1: Servidor de control remoto (socket server)}
+\textit{Enunciado: Implemente un código de Processing que act\'{u}e como servidor TCP.
+El servidor debe recibir comandos de \'{a}ngulos enviados desde un cliente remoto y retransmitirlos
 al servo f\'{i}sico. Se debe validar el rango del valor recibido antes de aplicarlo al hardware.}
 
 Processing incluye la librer\'{i}a nativa \texttt{processing.net} que permite crear servidores
-y clientes TCP sin dependencias externas~\cite{procnet}. En el servidor se crea un objeto
+y clientes TCP sin dependencias externas~\cite{procnet}. En el código se creó un objeto
 \texttt{Server} escuchando en el puerto~12345 (C\'{o}digo~\ref{lst:srv_setup}). El servo
 se configura igual que en la actividad anterior: pin~3 en modo \texttt{Arduino.SERVO}
 con posici\'{o}n inicial de $90^\circ$.
@@ -112,9 +112,34 @@ el servo o generar una se\~{n}al PWM incorrecta. La interfaz visual del servidor
 pantalla el \'{u}ltimo \'{a}ngulo recibido, lo que facilita la depuraci\'{o}n sin necesidad
 de abrir la consola.
 
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/circuito_act1.jpg}
+    \caption{Conexión del servomotor al pin digital del microcontrolador.}
+    \label{fig:circuito_act1}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/interfaz_act1.png}
+    \caption{Validación de la comunicación Socket: Servidor y Cliente sincronizados.}
+    \label{fig:interfaz_act1}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/resultado_servo_act1.jpg}
+    \caption{Comprobación del movimiento mecánico del actuador vía red.}
+    \label{fig:resultado_servo_act1}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/resultado_socket_act1.jpg}
+    \caption{Comprobación del movimiento mecánico del actuador vía red.}
+    \label{fig:resultado_socket_act1}
+\end{figure}
+
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Actividad 6.2: Cliente remoto con interfaz gr\'{a}fica ControlP5}
+\subsection{Actividad 6.2: Cliente remoto con interfaz gr\'{a}fica (socket client)}
 \textit{Enunciado: Desarrolle un cliente TCP en Processing que permita controlar remotamente
 el servo del servidor. La interfaz debe incluir sliders, knobs y una representaci\'{o}n gr\'{a}fica
 del servo. Solo el knob de servo debe transmitir datos al servidor; los sliders operan de forma
@@ -123,7 +148,8 @@ puramente visual.}
 El cliente importa \texttt{controlP5} para los controles de interfaz y \texttt{processing.net}
 para la conexi\'{o}n TCP. Al inicio, se crea un objeto \texttt{Client} apuntando a la direcci\'{o}n
 IP del equipo servidor y al puerto expuesto a trav\'{e}s del reenv\'{i}o de puertos de la red
-local (C\'{o}digo~\ref{lst:cli_setup}).
+local (C\'{o}digo~\ref{lst:cli_setup}). Así, el cliente conecta al puerto~8080 de la IP p\'{u}blica mientras el servidor escucha en el
+puerto~12345 localmente.
 
 \begin{lstlisting}[language=Java,
     caption={Creaci\'{o}n del cliente TCP y los controles en \texttt{setup()}.},
@@ -147,11 +173,6 @@ cp5.addKnob("Servo").setPosition(500, 60).setRadius(30).setRange(0, 180).setValu
 cp5.addKnob("knob2").setPosition(500, 150).setRadius(30).setRange(0, 255);
 cp5.addKnob("knob3").setPosition(500, 240).setRadius(30).setRange(0, 255);
 \end{lstlisting}
-
-El cliente conecta al puerto~8080 de la IP p\'{u}blica mientras el servidor escucha en el
-puerto~12345 localmente. Esto refleja un escenario real de IoT donde el router de la red
-donde est\'{a} el servidor redirige (NAT~\emph{port~forwarding}) el tr\'{a}fico externo del
-puerto~8080 al puerto~12345 de la m\'{a}quina interna con el Arduino.
 
 \pagebreak
 La transmisi\'{o}n al servidor se produce \'{u}nicamente a trav\'{e}s del callback
@@ -220,6 +241,13 @@ void dibujarServo(int angulo) {
     popMatrix();
 }
 \end{lstlisting}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/resultado_act2.jpg}
+    \caption{Evidencia de control remoto interoperable entre dos equipos.}
+    \label{fig:resultado_act2}
+\end{figure}
 
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -313,6 +341,31 @@ void dibujarServoGrafico(int x, int y, int angulo) {
 La llamada a \texttt{delay(20)} al final de \texttt{draw()} introduce una pausa breve para
 estabilizar la tasa de actualizaci\'{o}n del bus Firmata y evitar que lecturas demasiado
 r\'{a}pidas saturen la comunicaci\'{o}n serial~\cite{firmata}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/circuito_act3.jpg}
+    \caption{Montaje final unificado con Joystick y Servomotor.}
+    \label{fig:circuito_act3}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/interfaz_act3.png}
+    \caption{Respuesta del sistema al movimiento positivo en el eje X.}
+    \label{fig:interfaz_act3}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/resultado_der_act3.jpg}
+    \caption{Respuesta del sistema al movimiento negativo en el eje X.}
+    \label{fig:resultado_der_act3}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/resultado_izq_act3.jpg}
+    \caption{Interfaz de usuario final con datos del ADC y ángulo en tiempo real.}
+    \label{fig:resultado_izq_act3}
+\end{figure}
 
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
