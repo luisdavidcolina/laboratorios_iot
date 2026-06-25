@@ -1,0 +1,86 @@
+% !TeX spellcheck = es_VE
+% !TeX root = Informe.tex
+\input{../templates/plantilla_base.tex}
+\usepackage[T1]{fontenc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{fancy}
+\fancyhf{}
+
+\setlength{\headheight}{80pt}
+\addtolength{\topmargin}{-35pt}
+\setlength{\headsep}{1cm}
+\setlength{\footskip}{20pt}
+
+\rhead{\includegraphics[width=1.3cm]{../img/logo_ciencias.png}}
+\lhead{\includegraphics[width=1.4cm]{../img/logo_ucv.png}}
+\cfoot{\thepage}
+\rfoot{Junio, 2026}
+
+\chead{Laboratorio de Internet de las Cosas}
+\newcommand{\titulo}{LABORATORIO 3.5}
+\newcommand{\subtitulo}{Comunicación por Red y Control Remoto (Sockets)}
+\newcommand{\autorUno}{Luisdavid Colina V24766381}
+\newcommand{\autorDos}{Samantha Ramírez V31307714}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+  {\Large \textbf{\titulo}} \\[0.3cm]
+  {\large \textbf{\subtitulo}} \\[0.8cm]
+
+  \small
+  \begin{tabular}{c}
+    \textbf{Preparado por:} \\
+    \autorUno \\
+    \autorDos \\
+  \end{tabular}
+  \\[1cm]
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Desarrollo de actividades}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 5.1: Control remoto de servomotor mediante Sockets}
+\textit{
+    Enunciado: Implemente una arquitectura de comunicación Socket TCP utilizando la librería nativa processing.net de Processing para permitir el control de dispositivos IoT a través de la red:
+    \begin{itemize}
+        \item Construya un Socket Server en el equipo que posee el hardware (ATmega2560) y un Socket Client en un equipo remoto para controlar la posición de un servomotor por internet. (2 puntos)
+    \end{itemize}
+}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 5.2: Integración de Joystick}
+\textit{
+    Enunciado: Integre un Joystick físico al sistema para el control dinámico de los actuadores mediante una arquitectura unificada:
+    \begin{itemize}
+        \item Realice la conexión del Joystick a la placa: terminales VRX al pin analógico A0, VRY al pin A1 y el pulsador SW al pin digital 2. (1 punto)
+        \item Desarrolle un sistema Híbrido (Cliente-Servidor unificado) donde el código sea capaz de leer el hardware localmente y, simultáneamente, transmitir la telemetría a una interfaz simplificada. (2 puntos)
+        \item Implemente una lógica de mapeo del movimiento en el eje X y eje Y para controlar el rango de 0° a 90° del servo. (2 puntos)
+        \item Diseñe una interfaz de usuario simplificada que muestre en tiempo real el ángulo actual del servomotor y los ángulos de inclinación detectados en los ejes X e Y del joystick. (3 puntos)
+    \end{itemize}
+}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusiones}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begingroup
+\small
+\begin{thebibliography}{9}
+
+\bibitem{firmata}
+F.~Mellis, H.~Barragan y otros, ``Firmata Protocol Documentation,''
+\emph{Firmata GitHub Repository}, 2006--2024.
+[En l\'{i}nea]. Disponible: \url{https://github.com/firmata/protocol}.
+[Consulta: jun.~2026]
+
+\end{thebibliography}
+\endgroup
+
+\end{document}
