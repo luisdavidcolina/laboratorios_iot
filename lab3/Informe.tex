@@ -42,6 +42,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Desarrollo de actividades}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actividad 5.1: Carga del firmware StandardFirmata}
 \textit{Enunciado: Compile y suba a la placa el c\'{o}digo StandardFirmata disponible en la
 secci\'{o}n de ejemplos del IDE de Arduino.}
@@ -213,7 +214,7 @@ de la intensidad de la fotoresistencia. Implemente, en la misma interfaz, un com
 muestre los valores de intensidad de la foto-resistencia. Agregue un componente gráfico que 
 muestre la intensidad del fotoresistor.}
 
-Para esta actividad, se incorporó una fotoresistencia al circuito que ya se venía trabajando. Se armó un divisor de tensión básico: conectamos una pata del componente a los 5V y la otra al pin analógico A0 del Arduino, colocando también una resistencia de protección que va hacia tierra (GND). De esta forma, podemos medir cómo cambia el voltaje dependiendo de la cantidad de luz que recibe el sensor. El diseño del circuito en Fritzing se puede ver en la Figura~\ref{fig:diseno_act2}, y el montaje real armado en el protoboard se muestra en la Figura~\ref{fig:circuito_act2}.
+Para esta actividad, se incorporó una fotoresistencia al circuito que ya se venía trabajando. Conectamos una pata del componente a los 5V y la otra al pin analógico A0 del Arduino, colocando también una resistencia de protección que va hacia tierra (GND). De esta forma, se midió cómo cambia el voltaje dependiendo de la cantidad de luz que recibe el sensor. El diseño del circuito en Fritzing se puede ver en la Figura~\ref{fig:diseno_act2}, y el montaje real armado en el protoboard se muestra en la Figura~\ref{fig:circuito_act2}.
 
 \begin{figure}[ht!]
     \centering
@@ -229,7 +230,7 @@ Para esta actividad, se incorporó una fotoresistencia al circuito que ya se ven
 \end{figure}
 
 \pagebreak
-En el código de Processing, se agregaron los nuevos elementos para la interfaz. En la función \texttt{setup()}, se creó un nuevo gráfico (\texttt{Chart}) para ir dibujando la línea con los valores de la luz en el tiempo, ajustando su tamaño y color para que combine con el resto de la pantalla (C\'{o}digo~\ref{lst:grafica_fotoresistencia}).
+En la función \texttt{setup()} del código, se creó un nuevo gráfico para ir dibujando la línea con los valores de la luz en el tiempo (C\'{o}digo~\ref{lst:grafica_fotoresistencia}).
 
 \begin{lstlisting}[language=Java,
     caption={Creación del gráfico para la fotorresistencia en \texttt{setup()}.},
@@ -250,7 +251,7 @@ myChart2.setData("incoming2", new float[100]);
 \end{lstlisting}
 
 \pagebreak
-Luego, dentro de la función \texttt{draw()}, usamos \texttt{arduino.analogRead(0)} para leer el valor del pin \texttt{A0} a través de Firmata. Este se utiliza para tres cosas en la interfaz: mostrar el valor numérico en el panel de texto, enviarlo al gráfico inferior para actualizar la línea, y cambiar el nivel de transparencia de un nuevo LED virtual dibujado en pantalla (C\'{o}digo~\ref{lst:lectura_pin}).
+Luego, dentro de la función \texttt{draw()}, se usó \texttt{arduino.analogRead(0)} para leer el valor del pin \texttt{A0} a través de Firmata, mostrar el valor numérico en el panel de texto y actualizar el gráfico de línea (C\'{o}digo~\ref{lst:lectura_pin}).
 
 \begin{lstlisting}[language=Java,
     caption={Lectura del pin A0 y actualización de la interfaz en \texttt{draw()}.},
@@ -267,7 +268,7 @@ dibujarLED(260, 240, color(0, 255, 0), (int)valorFotoresistencia);
 
 \end{lstlisting}
 
-Cuando la fotoresistencia recibe la iluminación normal del cuarto, el valor se mantiene estable. Para probar que la interfaz responde correctamente, tapamos el sensor físico con el dedo para bloquear la luz, como se observa en la Figura~\ref{fig:resultado_act2_fotoresistencia}. Al hacer esto, el valor de voltaje que lee el pin A0 baja rápidamente. Esto se refleja al instante en Processing: la línea del gráfico inferior cae de golpe, el número en pantalla disminuye (llegando a 11.0) y el LED virtual verde se vuelve más opaco (Figura~\ref{fig:resultado_act2_interfaz}).
+Cuando la fotoresistencia recibe la iluminación normal, el valor se mantiene estable. Para probar que la interfaz respondía correctamente, tapamos el sensor físico con el dedo para bloquear la luz, como se observa en la Figura~\ref{fig:resultado_act2_fotoresistencia}. Al hacer esto, el valor de voltaje que lee el pin A0 bajó rápidamente. Esto se reflejó al instante en Processing: la línea del gráfico inferior cayó de golpe y el número en pantalla disminuyó (llegando a 11.0) (Figura~\ref{fig:resultado_act2_interfaz}).
 
 \begin{figure}[ht!]
     \centering
@@ -290,7 +291,7 @@ un servo motor. Muestre un control de tipo \emph{knob} que indique el desplazami
 grados del brazo del servo. Al encontrarse el control en su valor medio, el servo debe
 estar a $90^\circ$.}
 
-Se agreg\'{o} un servo motor al circuito connect\'{a}ndolo al pin digital 10. Con
+Se agreg\'{o} un servo motor al circuito conect\'{a}ndolo al pin digital 10. Con
 Firmata, al configurar un pin como servo, la placa genera autom\'{a}ticamente la se\~{n}al
 de posicionamiento sin que Processing tenga que hacer nada extra~\cite{firmata}. El
 dise\~{n}o del circuito est\'{a} en la Figura~\ref{fig:diseno_act3} y el montaje f\'{i}sico
