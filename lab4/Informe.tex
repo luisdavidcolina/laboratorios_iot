@@ -1,0 +1,549 @@
+% !TeX spellcheck = es_VE
+% !TeX root = Informe.tex
+%
+% ESTADO: practica ejecutada el viernes 18/09/2026.
+% Con evidencia: 6.2 (lectura del DHT) y 6.10/6.11 (montaje y automatizacion).
+% Falta: diagramas en Fritzing (6.1, 6.5, 6.10), captura del rele solo (6.6, 6.7)
+% y las corridas de los scripts de Python (6.3, 6.8, 6.12).
+%
+\input{../templates/plantilla_base.tex}
+\usepackage[T1]{fontenc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{fancy}
+\fancyhf{}
+
+\setlength{\headheight}{80pt}
+\addtolength{\topmargin}{-35pt}
+\setlength{\headsep}{1cm}
+\setlength{\footskip}{20pt}
+
+\rhead{\includegraphics[width=1.3cm]{../img/logo_ciencias.png}}
+\lhead{\includegraphics[width=1.4cm]{../img/logo_ucv.png}}
+\cfoot{\thepage}
+\rfoot{Septiembre, 2026}
+
+\chead{Laboratorio de Internet de las Cosas}
+\newcommand{\titulo}{LABORATORIO 4}
+\newcommand{\subtitulo}{Sensores y Actuadores}
+\newcommand{\autorUno}{Luisdavid Colina V24766381}
+\newcommand{\autorDos}{Samantha Ramírez V31307714}
+
+% Marca de trabajo pendiente, se elimina al cerrar el informe
+\newcommand{\pendiente}[1]{%
+  \par\vspace{0.3em}%
+  \fbox{\parbox{0.97\linewidth}{\small\textit{Pendiente. #1}}}%
+  \par\vspace{0.3em}%
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+  {\Large \textbf{\titulo}} \\[0.3cm]
+  {\large \textbf{\subtitulo}} \\[0.8cm]
+
+  \small
+  \begin{tabular}{c}
+    \textbf{Preparado por:} \\
+    \autorUno \\
+    \autorDos \\
+  \end{tabular}
+  \\[1cm]
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hardware utilizado}
+
+Antes de entrar en las actividades conviene dejar constancia de dos diferencias
+respecto a lo que plantea la guía, porque explican los valores que aparecen en
+todas las capturas de este informe.
+
+La primera es la placa. La guía indica un ATmega2560, pero la mesa de trabajo tenía
+disponible una Arduino~UNO. Para lo que pide el laboratorio la sustitución es
+transparente, ya que tanto la librería del sensor como el control del relé usan
+pines digitales genéricos y comunicación serial a 9600~baudios, sin depender de
+ninguna característica exclusiva del Mega.
+
+La segunda es el sensor. El módulo disponible fue un DHT-22 en lugar del DHT-11.
+Ambos se manejan con la misma librería \texttt{DHT.h} y se diferencian solo en la
+constante de tipo, así que el cambio se resolvió con una línea. La diferencia
+práctica sí es visible en las lecturas: el DHT-11 devuelve siempre cero en los
+bytes de la parte decimal, mientras que el DHT-22 entrega resolución decimal real,
+que es justamente lo que se observa en los valores de humedad de las capturas.
+
+\begin{center}
+\small
+\begin{tabular}{ll}
+\hline
+\textbf{Elemento} & \textbf{Conexión} \\
+\hline
+Placa               & Arduino UNO, puerto \texttt{/dev/ttyUSB0} a 9600 baudios \\
+Sensor DHT-22       & Pin de datos en digital 4 \\
+Módulo de relé      & Entrada de control \texttt{IN} en digital 2, activo en bajo \\
+Alimentación        & 5~V y GND de la placa hacia la protoboard \\
+\hline
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Monitoreo de datos ambientales}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.1: Circuito de conexión del sensor}
+\textit{Enunciado: Muestre el circuito de conexión del DHT-11 a la placa, utilice para ello
+Fritzing. (1 punto)}
+
+\pendiente{Falta levantar el diagrama en Fritzing del sensor conectado a la placa.
+El montaje físico correspondiente quedó registrado en la
+Figura~\ref{fig:montaje_dht_rele}.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.2: Lectura del sensor}
+\textit{Enunciado: Compile y suba el código 1 mostrado en los Anexos. Explique el
+funcionamiento general del código. Adjunte capturas de pantalla en el informe. (2 puntos)}
+
+El código del anexo se subió tal cual, con el único ajuste de las dos constantes que
+describen el hardware disponible (Código~\ref{lst:dht_pines}). El resto del sketch quedó
+intacto.
+
+\begin{lstlisting}[language=C++,
+    caption={Ajuste de las constantes al hardware de la mesa de trabajo.},
+    label={lst:dht_pines},
+    float=ht!]
+#define DHT_PIN       4        // Pin de datos del sensor
+#define DHT_TYPE      DHT22    // Tipo de sensor disponible
+\end{lstlisting}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.85\linewidth]{img/sketch_dht.png}
+    \caption{Sketch de lectura del sensor cargado en el IDE de Arduino.}
+    \label{fig:sketch_dht}
+\end{figure}
+
+\pagebreak
+
+El funcionamiento general es el siguiente. En \texttt{setup()} se abre el puerto serial a
+9600~baudios, se inicializa el sensor con \texttt{sensorDHT.begin()} y se espera dos
+segundos antes de la primera lectura, porque el DHT necesita ese tiempo para estabilizar
+su circuito interno de medición.
+
+El lazo \texttt{loop()} empieza con un \texttt{delay(2000)}. Esa pausa no es decorativa:
+la frecuencia de muestreo del sensor es de 1~Hz, de modo que pedirle lecturas más seguido
+devuelve el valor almacenado de la medición anterior en lugar de una lectura nueva.
+
+Luego se llama a \texttt{readHumidity()} y \texttt{readTemperature()}, y el resultado se
+valida con \texttt{isnan()} antes de usarlo. Esa validación es necesaria porque la
+librería no lanza errores: cuando la trama de 40~bits llega corrupta o no llega, devuelve
+un valor no numérico. Sin esa comprobación el programa seguiría imprimiendo basura como
+si fueran mediciones válidas.
+
+Con los datos ya validados se calcula el índice de calor mediante
+\texttt{computeHeatIndex()}, que combina temperatura y humedad en la temperatura
+aparente, y finalmente se imprime el bloque formateado junto con una clasificación por
+umbrales, que marca la temperatura como alta por encima de $30^\circ$C y la humedad como
+alta por encima de 70\,\%.
+
+La Figura~\ref{fig:monitor_serial_dht} muestra cuatro ciclos consecutivos del monitor
+serial. Las lecturas se mantuvieron alrededor de $26{,}0^\circ$C y 47\,\% de humedad
+relativa, ambas dentro del rango normal según los umbrales del propio código.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/monitor_serial_dht.png}
+    \caption{Salida del monitor serial con las lecturas del sensor.}
+    \label{fig:monitor_serial_dht}
+\end{figure}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.3: Lectura desde un script en Python}
+\textit{Enunciado: Investigue de qué manera un script en Python puede obtener los datos que
+el sensor DHT-11 escribe en el puerto serial. Programe en Python un ejemplo de uso que
+muestre los datos del sensor, debe instalar en Python la librería \texttt{pyserial}.
+(2 puntos)}
+
+El microcontrolador no expone los datos de ninguna forma especial. Todo lo que hace es
+escribir texto en el puerto serial con \texttt{Serial.println()}, y ese puerto, del lado
+del PC, aparece como un archivo de dispositivo (\texttt{/dev/ttyUSB0} en el Linux Mint de
+la mesa de trabajo). Lo que aporta \texttt{pyserial} es la capa que configura la velocidad,
+la paridad y los tiempos de espera, y que entrega el flujo de bytes ya listo para
+leer~\cite{pyserial}.
+
+Hay dos detalles que conviene resolver desde el principio. El primero es que abrir el
+puerto reinicia la placa, por lo que hay que esperar un par de segundos antes de leer o
+las primeras líneas llegan cortadas. El segundo es que el monitor serial del IDE de
+Arduino toma el puerto de forma exclusiva, así que debe estar cerrado para que el script
+pueda abrirlo.
+
+\begin{lstlisting}[language=Python,
+    caption={Núcleo del script de lectura, en \texttt{src/dht\_serial.py}.},
+    label={lst:dht_serial},
+    float=ht!]
+with serial.Serial(puerto, baudrate, timeout=timeout) as enlace:
+    # Abrir el puerto reinicia la placa, hay que darle tiempo al setup()
+    time.sleep(2)
+    enlace.reset_input_buffer()
+
+    while True:
+        linea = enlace.readline().decode("utf-8", errors="ignore").strip()
+        if not linea:
+            continue
+
+        marca = time.strftime("%H:%M:%S")
+        if "ERROR" in linea:
+            print(f"[{marca}] [FALLA] {linea}")
+        else:
+            print(f"[{marca}] {linea}")
+\end{lstlisting}
+
+El uso de \texttt{errors="ignore"} en el decodificado evita que el script muera si llega
+un byte suelto al momento de conectarse, y el \texttt{timeout} hace que
+\texttt{readline()} devuelva una cadena vacía en lugar de bloquearse para siempre cuando
+la placa deja de transmitir.
+
+\pendiente{Falta ejecutar el script contra la placa y capturar su salida en la terminal.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.4: Demostración al instructor}
+\textit{Enunciado: Muestre el funcionamiento del código al instructor. (1 punto)}
+
+\pendiente{Queda por presentar al instructor la corrida del script de la
+actividad~6.3.}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Control de dispositivo de potencia}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.5: Circuito de conexión del relé}
+\textit{Enunciado: Muestre el circuito de conexión del Relé a la placa, utilice para ello
+Fritzing. (1 punto)}
+
+\pendiente{Falta levantar el diagrama en Fritzing del módulo de relé conectado a la
+placa.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.6: Control básico del relé}
+\textit{Enunciado: Compile y suba el código 2 mostrado en los Anexos. Explique el
+funcionamiento general del código. Adjunte capturas de pantalla en el informe. (2 puntos)}
+
+El único ajuste al código del anexo fue mover el pin de control a digital~2, que es donde
+quedó cableada la entrada \texttt{IN} del módulo.
+
+El sketch hace dos cosas a la vez dentro de \texttt{loop()}. Por un lado mantiene una
+secuencia automática de prueba que invierte el estado del relé cada cinco segundos, pero
+lo hace comparando \texttt{millis()} contra una marca de tiempo anterior en lugar de usar
+\texttt{delay()}. Esa distinción importa, porque \texttt{delay()} congelaría la placa
+durante esos cinco segundos y no podría atender nada más. Por otro lado revisa en cada
+vuelta si llegó un carácter por el puerto serial y, de ser así, lo despacha a
+\texttt{procesarComando()}.
+
+El detalle que más confunde de este montaje es que el módulo es activo en bajo. Escribir
+\texttt{LOW} en el pin de control energiza la bobina y escribir \texttt{HIGH} la
+desenergiza, que es lo contrario de lo que sugiere la intuición. El sketch lo resuelve con
+el operador ternario \texttt{estadoRele ? LOW : HIGH}, y por eso el estado inicial seguro
+en \texttt{setup()} es \texttt{HIGH}.
+
+\begin{lstlisting}[language=C++,
+    caption={Conmutación del relé y atención de comandos en \texttt{loop()}.},
+    label={lst:rele_loop},
+    float=ht!]
+if (tiempoActual - tiempoAnterior >= INTERVALO_PRUEBA) {
+    tiempoAnterior = tiempoActual;
+
+    estadoRele = !estadoRele;
+    cicloPrueba++;
+
+    digitalWrite(PIN_RELE, estadoRele ? LOW : HIGH);  // Activo LOW
+    digitalWrite(PIN_LED_IND, estadoRele ? HIGH : LOW);
+}
+
+if (Serial.available() > 0) {
+    char comando = Serial.read();
+    procesarComando(comando);
+}
+\end{lstlisting}
+
+\pendiente{Falta la captura del monitor serial con la secuencia de ciclos del relé.}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.7: Relé con estado persistente}
+\textit{Enunciado: Modifique el código para que el Relé mantenga el estado y solo se
+modifique cuando se le indique a través del puerto serial. (2 puntos)}
+
+La modificación consistió en eliminar por completo el bloque de la secuencia automática,
+que era lo único que cambiaba el actuador por su cuenta. Sin ese bloque el lazo queda
+reducido a atender comandos, y el relé conserva indefinidamente el último estado que se
+le indicó.
+
+Aprovechando el cambio se centralizó la escritura al hardware en una función
+\texttt{aplicarEstado()}. En el sketch original cada rama del \texttt{switch} repetía las
+dos llamadas a \texttt{digitalWrite()} junto con la asignación a \texttt{estadoRele}, y
+ese patrón hace fácil que el estado lógico y el estado físico terminen desincronizados si
+alguna rama se edita y otra no.
+
+\begin{lstlisting}[language=C++,
+    caption={Lazo principal y escritura centralizada, en \texttt{src/rele\_estado.ino}.},
+    label={lst:rele_estado},
+    float=ht!]
+void loop() {
+  // El lazo no toca el actuador, solo atiende comandos entrantes
+  if (Serial.available() > 0) {
+    char comando = Serial.read();
+    procesarComando(comando);
+  }
+}
+
+void aplicarEstado(bool encendido) {
+  estadoRele = encendido;
+  digitalWrite(PIN_RELE, encendido ? LOW : HIGH);   // Activo LOW
+  digitalWrite(PIN_LED_IND, encendido ? HIGH : LOW);
+}
+\end{lstlisting}
+
+Se agregaron además dos casos que ignoran \texttt{'\textbackslash r'} y
+\texttt{'\textbackslash n'}. Sin ellos, el monitor serial configurado en modo
+\textit{New Line} agrega el salto al final de cada envío y el sketch responde con el
+mensaje de comando no reconocido después de cada orden válida.
+
+\pendiente{Falta la captura del monitor serial mostrando que el relé conserva el estado
+entre comandos.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.8: Consulta y control del relé desde Python}
+\textit{Enunciado: Investigue de qué manera un script en Python podría leer el estado
+actual del Relé y adicionalmente enviar comandos a la placa para modificar el estado del
+actuador. Programe en Python un ejemplo de uso, debe instalar en Python la librería
+\texttt{pyserial}. (2 puntos)}
+
+La clave está en que el puerto serial es bidireccional, de modo que el mismo enlace que se
+usó para leer en la actividad~6.3 sirve para escribir. El sketch ya define un protocolo
+mínimo de un carácter por comando, así que del lado de Python basta con escribir ese
+carácter y leer las líneas que la placa devuelva.
+
+Leer el estado merece una aclaración. La placa no expone una variable que Python pueda
+consultar directamente, lo que hace el script es enviar el comando \texttt{'S'} y
+interpretar la respuesta de texto. Por eso \texttt{consultar\_estado()} busca la marca
+\texttt{[ESTADO]} en las líneas recibidas y decide a partir de ella.
+
+\begin{lstlisting}[language=Python,
+    caption={Envío de comandos y lectura del estado, en \texttt{src/rele\_serial.py}.},
+    label={lst:rele_serial},
+    float=ht!]
+def enviar(enlace, comando, espera=0.4):
+    """Envia un comando y devuelve las lineas que responda la placa."""
+    enlace.reset_input_buffer()
+    enlace.write(comando.encode("ascii"))
+    enlace.flush()
+    time.sleep(espera)
+
+    respuesta = []
+    while enlace.in_waiting:
+        linea = enlace.readline().decode("utf-8", errors="ignore").strip()
+        if linea:
+            respuesta.append(linea)
+    return respuesta
+
+
+def consultar_estado(enlace):
+    for linea in enviar(enlace, "S"):
+        if "[ESTADO]" in linea:
+            return "DESACTIVADO" not in linea
+    return None
+\end{lstlisting}
+
+El \texttt{reset\_input\_buffer()} antes de escribir descarta lo que hubiera quedado sin
+leer de una orden anterior, para que la respuesta que se recoge corresponda al comando
+recién enviado. La pausa de 400~ms da tiempo a que la placa procese y conteste antes de
+revisar \texttt{in\_waiting}.
+
+\pendiente{Falta ejecutar el script contra la placa y capturar la sesión de comandos.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.9: Demostración al instructor}
+\textit{Enunciado: Muestre el funcionamiento del código al instructor. (1 punto)}
+
+\pendiente{Queda por presentar al instructor la corrida del script de la
+actividad~6.8.}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Automatización mediante sensor y actuador}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.10: Circuito con sensor y actuador}
+\textit{Enunciado: Muestre el circuito de conexión que incluya al sensor y al actuador,
+utilice para ello Fritzing. (1 punto)}
+
+El montaje final integró los dos elementos sobre la misma placa. El sensor quedó en la
+protoboard con su línea de datos hacia el pin~4, y el módulo de relé recibió la señal de
+control en el pin~2, con la alimentación de ambos tomada de los rieles de 5~V y GND
+(Figuras~\ref{fig:montaje_dht_rele} y~\ref{fig:montaje_angulo}).
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.52\linewidth]{img/montaje_dht_rele.jpg}
+    \caption{Montaje del sensor y el relé sobre la Arduino UNO.}
+    \label{fig:montaje_dht_rele}
+\end{figure}
+
+\pagebreak
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.52\linewidth]{img/montaje_dht_rele_angulo.jpg}
+    \caption{Segunda vista del montaje, con el cableado de control y alimentación.}
+    \label{fig:montaje_angulo}
+\end{figure}
+
+\pendiente{Falta levantar en Fritzing el diagrama equivalente al montaje de las
+figuras anteriores.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.11: Automatización por umbrales}
+\textit{Enunciado: Programe, en el ATmega2560, el código para que el Relé mantenga el
+estado y solo se modifique cuando se le indique a través del puerto serial. (2 puntos)}
+
+El enunciado de esta actividad repite el texto de la actividad~6.7, que ya se resolvió en
+la sección anterior. Como el bloque en el que está ubicada se titula
+\textit{Automatización mediante Sensor y Actuador} y es el primero que exige tener el
+sensor y el actuador conectados al mismo tiempo, se interpretó que lo pedido es el control
+automático del relé a partir de las lecturas del sensor.
+
+El sketch resultante combina las dos mitades anteriores. Lee temperatura y humedad cada
+dos segundos, las compara contra dos umbrales configurables y acciona el relé cuando
+cualquiera de los dos se supera. El operador lógico usado es la disyunción, de modo que
+basta con que una de las dos variables se salga de rango para que el actuador se
+active (Código~\ref{lst:integrado}).
+
+\begin{lstlisting}[language=C++,
+    caption={Lógica de control por umbrales, en \texttt{src/dht11\_rele.ino}.},
+    label={lst:integrado},
+    float=ht!]
+float limiteTemperatura = 30.0;
+float limiteHumedad = 60.0;
+
+if (temperatura >= limiteTemperatura || humedad >= limiteHumedad) {
+    digitalWrite(PIN_RELE, LOW);    // Activa el rele
+    Serial.println(F("-> ALERTA: Limite superado (Temp o Hum). Rele ENCENDIDO."));
+} else {
+    digitalWrite(PIN_RELE, HIGH);   // Apaga el rele
+    Serial.println(F("-> Condiciones normales. Rele APAGADO."));
+}
+\end{lstlisting}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.85\linewidth]{img/sketch_integrado.png}
+    \caption{Sketch integrado cargado en el IDE, con los umbrales configurados.}
+    \label{fig:sketch_integrado}
+\end{figure}
+
+\pagebreak
+
+El umbral de humedad se ajustó durante la prueba de 70\,\% a 60\,\% para acercarlo a
+las condiciones del salón, donde las lecturas rondaban el 50\,\%. Aun así no se alcanzó
+a cruzar el umbral, de modo que la Figura~\ref{fig:monitor_serial_integrado} documenta la
+rama de condiciones normales con el relé apagado, que es el comportamiento correcto para
+esos valores.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/monitor_serial_integrado.png}
+    \caption{Telemetría del sistema integrado con el relé en reposo.}
+    \label{fig:monitor_serial_integrado}
+\end{figure}
+
+Vale la pena anotar una limitación de esta implementación. Al comparar contra un único
+valor por variable, una lectura que oscile justo alrededor del umbral hace que el relé
+conmute de forma repetida. La forma habitual de evitarlo es usar dos umbrales separados,
+uno para encender y otro más bajo para apagar, que es lo que se conoce como histéresis.
+
+\pendiente{Falta forzar la condición de alarma, por ejemplo acercando una fuente de calor
+o humedad al sensor, para dejar evidencia de la rama que enciende el relé.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.12: Supervisión del sistema desde Python}
+\textit{Enunciado: Investigue de qué manera un script en Python podría leer el estado
+actual del Relé y adicionalmente enviar comandos a la placa para modificar el estado del
+actuador. Programe en Python un ejemplo de uso, debe instalar en Python la librería
+\texttt{pyserial}. (2 puntos)}
+
+El enunciado repite el de la actividad~6.8, y el script de
+\texttt{src/rele\_serial.py} aplica igual sobre el montaje integrado. La única diferencia
+es que el sketch de la actividad~6.11 publica telemetría de forma continua, por lo que el
+script recibe las líneas de temperatura y humedad además de las respuestas a sus comandos.
+
+\pendiente{Falta ejecutar el script sobre el montaje integrado y capturar la sesión.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Actividad 6.13: Demostración al instructor}
+\textit{Enunciado: Muestre el funcionamiento del código al instructor. (1 punto)}
+
+\pendiente{Queda por presentar al instructor el funcionamiento del sistema integrado.}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusiones}
+
+El laboratorio dejó claro que trabajar con un sensor digital no se reduce a leer un
+valor. El DHT entrega una trama de 40~bits que puede llegar corrupta, y la librería
+señala esa falla devolviendo un valor no numérico en lugar de lanzar un error. La
+validación con \texttt{isnan()} no es una precaución opcional, es lo único que separa una
+medición real de un dato sin sentido.
+
+Del lado del actuador, el punto que más costó asimilar fue la lógica invertida del módulo
+de relé. Un módulo activo en bajo se energiza escribiendo \texttt{LOW}, de modo que el
+estado seguro al arrancar es \texttt{HIGH}. Fijar ese estado en \texttt{setup()} evita que
+la carga quede conectada durante el arranque de la placa.
+
+Separar el estado lógico del estado físico resultó ser la decisión más útil del
+laboratorio. Concentrar las llamadas a \texttt{digitalWrite()} en una sola función hace
+imposible que una rama del código cambie el actuador sin actualizar la variable que lo
+describe, que es justamente el error que después Python no podría detectar cuando consulta
+el estado por el puerto serial.
+
+Finalmente, la automatización por umbrales mostró el esquema completo de un sistema IoT
+sencillo: el sensor entrega el dato, la lógica en el microcontrolador decide y el actuador
+ejecuta, todo sin intervención del PC. El PC queda solo como observador a través del
+puerto serial, que es exactamente la separación entre la lógica de interfaz y la ejecución
+en hardware que plantea la introducción de la guía.
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begingroup
+\small
+\begin{thebibliography}{9}
+
+\bibitem{dhtlib}
+Adafruit Industries, ``DHT-sensor-library,'' \emph{GitHub Repository}, 2012--2024.
+[En línea]. Disponible: \url{https://github.com/adafruit/DHT-sensor-library}.
+[Consulta: sep.~2026]
+
+\bibitem{aosong}
+Aosong Electronics, ``DHT22 (AM2302) Digital-output relative humidity and temperature
+sensor,'' hoja de datos técnica, 2024. [En línea]. Disponible:
+\url{https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf}.
+[Consulta: sep.~2026]
+
+\bibitem{pyserial}
+C.~Liechti, ``pySerial Documentation,'' 2001--2024. [En línea]. Disponible:
+\url{https://pyserial.readthedocs.io/en/latest/}. [Consulta: sep.~2026]
+
+\bibitem{arduinoref}
+Arduino, ``Arduino Language Reference,'' \emph{Arduino Documentation}, Arduino LLC, 2024.
+[En línea]. Disponible: \url{https://docs.arduino.cc/language-reference/}.
+[Consulta: sep.~2026]
+
+\bibitem{guialab}
+A.~Russoniello, ``Laboratorio: Sensores y Actuadores,'' guía de práctica de laboratorio,
+Laboratorio General (Internet de las Cosas), Escuela de Computación,
+Facultad de Ciencias, Universidad Central de Venezuela, Caracas, 2026.
+
+\end{thebibliography}
+\endgroup
+
+\end{document}
