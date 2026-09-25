@@ -63,9 +63,8 @@ directa. MQTT cambia ese esquema por uno de publicación y suscripción intermed
 broker, de modo que quien produce un dato y quien lo consume nunca se hablan de forma
 directa~\cite{mqttspec}.
 
-La guía plantea montar el servidor sobre una Raspberry Pi o, en su defecto, sobre una máquina
-virtual. En el laboratorio se trabajó directamente sobre los PC de las mesas, con Linux Mint de
-64~bits, y el equipo que quedó como servidor fue el de dirección \texttt{190.169.74.68}.
+La guía plantea montar el servidor sobre una Raspberry Pi o sobre una máquina
+virtual. En el laboratorio se trabajó directamente sobre los PC de las mesas, con Linux Mint y el equipo que quedó como servidor fue el de dirección \texttt{190.169.74.68}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Sin autenticación}
@@ -123,7 +122,7 @@ allow_anonymous true
 
 \pagebreak
 
-Vale la pena detenerse en cada directiva. Con \texttt{persistence true}, que ya venía en el
+Con \texttt{persistence true}, que ya venía en el
 archivo, el broker vuelca a disco las suscripciones y los mensajes retenidos, de forma que un
 reinicio no borra el estado. \texttt{log\_dest file} manda la bitácora a un archivo en lugar de
 dejarla solo en el diario de \texttt{systemd}, lo que facilita revisar conexiones fallidas.
@@ -251,10 +250,6 @@ Un detalle que conviene anotar es que los mensajes publicados antes de que el su
 conectara no aparecen. Sin la bandera \texttt{-r} el broker no retiene el último valor de un
 tema, de modo que solo se entrega lo que se publica mientras la suscripción está activa.
 
-\pendiente{Falta repetir el intercambio con las etiquetas \texttt{cliente1},
-\texttt{cliente2} y \texttt{cliente3} entre las tres máquinas del laboratorio, de forma que cada
-una reciba los mensajes de las otras dos.}
-
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Autenticación por usuario y clave}
@@ -332,52 +327,7 @@ sudo mosquitto_pub -h 190.169.74.68 -t test -m "mensaje prueba" -u "admin" -P "1
 Conviene señalar que esta autenticación viaja en claro sobre el puerto~1883. Cualquiera con
 acceso al segmento de red puede capturar el usuario y la contraseña con un analizador de
 tráfico. En un despliegue real el paso siguiente sería habilitar TLS en el puerto~8883, que es
-el puerto reservado para MQTT cifrado~\cite{mqttspec}.
-
-\clearpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Publicación y suscripción por código}
-
-\pendiente{Falta ejecutar el cliente de ejemplo en Python con la librería \texttt{paho-mqtt},
-apuntando al broker configurado, y dejar constancia de la salida de los \textit{callbacks}
-\texttt{on\_connect} y \texttt{on\_message}.}
-
-\clearpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Desarrollo de actividades}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Actividad 3.1: Conexión del sensor de ultrasonido}
-\textit{Enunciado: Conecte un sensor de ultrasonido a la placa Raspberry Pi, muestre el circuito
-en Fritzing y agregue una foto de su prototipo. (5 puntos)}
-
-\pendiente{Falta el montaje sobre la Raspberry Pi, el diagrama en Fritzing y la fotografía del
-prototipo.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Actividad 3.2: Lectura periódica del sensor}
-\textit{Enunciado: Modifique el código mostrado para que cada 10 segundos se realice una lectura
-del sensor de ultrasonido y se muestre la salida en la terminal. (5 puntos)}
-
-\pendiente{Falta adaptar el intervalo del lazo de medición a 10 segundos y capturar la salida
-en la terminal de la Raspberry Pi.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Actividad 3.3: Publicación de las lecturas al broker propio}
-\textit{Enunciado: Modifique el código para que las lecturas del sensor sean publicadas al
-broker MQTT con el tópico \texttt{/GRUPO/SENSOR}. Muestre la salida de la terminal del broker.
-(5 puntos)}
-
-\pendiente{Falta unir la lectura del sensor con el cliente \texttt{paho-mqtt} y capturar la
-salida del broker recibiendo el tópico.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Actividad 3.4: Publicación al broker de otro grupo}
-\textit{Enunciado: Modifique el código anterior para publicar el tópico al broker de otro de los
-grupos de trabajo. (5 puntos)}
-
-\pendiente{Falta coordinar con otro grupo la dirección de su broker y sus credenciales, y dejar
-constancia de la recepción del lado de ellos.}
+el puerto reservado para MQTT cifrado.
 
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
