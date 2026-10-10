@@ -1,6 +1,6 @@
-# Laboratorios IoT — Escuela de Computación, UCV
+# Laboratorios IoT, Escuela de Computación, UCV
 
-Repositorio de informes de laboratorio de la asignatura **6565 — Laboratorio General (Internet de las Cosas)**, Escuela de Computación, Facultad de Ciencias, Universidad Central de Venezuela.
+Repositorio de informes de laboratorio de la asignatura **6565 Laboratorio General (Internet de las Cosas)**, Escuela de Computación, Facultad de Ciencias, Universidad Central de Venezuela.
 
 **Semestre:** 1-2026  
 **Profesor:** Prof. Antonio Russoniello  
@@ -16,21 +16,16 @@ Repositorio de informes de laboratorio de la asignatura **6565 — Laboratorio G
 | `lab2` | Comunicación serial y pines analógicos | Entregado |
 | `lab3` | Interfaz gráfica con Processing y Firmata | Entregado |
 | `lab3.5` | Control remoto con sockets y joystick | Entregado |
-| `lab4` | Sensores y actuadores (DHT-22 y relé) | En curso, práctica del 18/09/2026 |
-| `lab5` | Protocolo MQTT con Mosquitto | En curso, práctica del 11/09/2026 |
+| `lab4` | Sensores y actuadores (DHT-22 y relé) | Entregado |
+| `lab5` | Protocolo MQTT con Mosquitto | Entregado |
+| `lab6` | Visualización de datos con Grafana | Práctica del 09/10/2026 |
 
-### Pendientes del lab4
+### Notas del lab6
 
-- Diagramas en Fritzing de las actividades 6.1, 6.5 y 6.10.
-- Captura del monitor serial del relé solo (6.6 y 6.7).
-- Corrida de los scripts de Python `dht_serial.py` y `rele_serial.py` (6.3, 6.8 y 6.12).
-- Forzar la condición de alarma del sistema integrado para evidenciar la rama que enciende el relé.
-
-### Pendientes del lab5
-
-- Intercambio con las etiquetas `cliente1`, `cliente2` y `cliente3` entre las tres máquinas.
-- Sección 2.3 de la guía, cliente `paho-mqtt` en Python.
-- Actividades 3.1 a 3.4, sensor de ultrasonido sobre Raspberry Pi publicando al broker.
+- El montaje se hizo con una placa ESP32 y un HC-SR04, no con Raspberry Pi ni Fritzing.
+- Los tópicos de temperatura y humedad van con valor fijo porque el único sensor
+  disponible fue el de ultrasonido.
+- Las actividades 5.3 y 5.4 de la guía quedaron fuera del informe por decisión del equipo.
 
 ---
 
