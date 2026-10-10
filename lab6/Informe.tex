@@ -58,7 +58,7 @@
 
 El laboratorio anterior dejó un broker Mosquitto funcionando y la comprobación de
 que los mensajes llegaban de una máquina a otra. Lo que faltaba era ver esos datos.
-Una línea de texto en una terminal sirve para confirmar que el enlace funciona, pero
+Una línea de texto en una terminal basta para confirmar que el enlace funciona, pero
 no deja ver una tendencia ni comparar dos momentos. Grafana resuelve esa parte
 leyendo de una fuente de datos y dibujando la serie en el tiempo~\cite{grafanadocs}.
 
@@ -202,7 +202,7 @@ cambiar la contraseña \texttt{admin} que trae por defecto.
 \section{Adquisición de datos del sensor}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Actividad 5.1: Conexión del sensor y script de recepción}
+\subsection{Conexión del sensor y script de recepción}
 \textit{Enunciado: Conecte el sensor de Ultrasonidos a la placa. Programe un script en
 Python que sea capaz de recibir los datos enviados por el sensor. Muestre el circuito
 en Fritzing. (5 puntos)}
@@ -296,7 +296,7 @@ números y harían fallar el programa.
 \section{Publicación y visualización}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Actividad 5.2: Tópicos en el broker y panel en Grafana}
+\subsection{Tópicos en el broker y panel en Grafana}
 \textit{Enunciado: El script debe publicar los datos recibidos como tópicos y
 enviarlos al broker mosquitto. Siga la siguiente nomenclatura para los tópicos
 \texttt{/NombreGrupo/distancia}, \texttt{/NombreGrupo/temperatura},
@@ -416,7 +416,7 @@ tiene que tener cada librería instalada dentro, no en el sistema. Son pasos
 mecánicos, pero cualquiera que se salte deja la placa en un estado en el que no
 responde y no hay un mensaje de error que apunte a la causa.
 
-Queda claro también para qué sirve la visualización. Las mismas lecturas que en la
+Queda clara también la utilidad de la visualización. Las mismas lecturas que en la
 terminal son una lista de números sin forma, en la gráfica muestran de inmediato el
 rango habitual de la medición y las mediciones sueltas que se salen de ese rango.
 
