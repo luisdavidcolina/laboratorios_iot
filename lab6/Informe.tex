@@ -131,7 +131,8 @@ el contenedor para dejar el equipo como estaba.
 La instalación siguió el repositorio oficial de Docker para Debian. Después de
 instalar el motor se agregó el usuario al grupo \texttt{docker} y se ajustó el
 permiso sobre el socket, que es lo que permite lanzar contenedores sin anteponer
-\texttt{sudo} a cada comando.
+\texttt{sudo} a cada comando. Las versiones que quedaron instaladas se ven en la
+Figura~\ref{fig:docker_version}.
 
 \begin{lstlisting}[language=bash,
     caption={Permiso de acceso al socket de Docker.},
@@ -240,7 +241,8 @@ sonido~\cite{hcsr04}.
 \textbf{Firmware de la placa.} La placa venía sin MicroPython, así que primero hubo
 que grabarlo. El trabajo se hizo desde un entorno virtual de Python con
 \texttt{esptool} para borrar y escribir la memoria flash, y \texttt{mpremote} para
-copiar archivos a la placa ya encendida~\cite{micropython}.
+copiar archivos a la placa ya encendida~\cite{micropython}. La secuencia completa
+quedó registrada en la Figura~\ref{fig:flasheo}.
 
 \begin{figure}[ht!]
     \centering
@@ -261,7 +263,8 @@ reiniciando la placa por la línea RTS (Figura~\ref{fig:firmware}).
     \label{fig:firmware}
 \end{figure}
 
-El programa que corre en la placa calcula la distancia a partir del tiempo de vuelo.
+El programa que corre en la placa, \texttt{main.py} en la
+Figura~\ref{fig:main_py}, calcula la distancia a partir del tiempo de vuelo.
 Pone \texttt{TRIG} en alto durante diez microsegundos, mide con
 \texttt{time\_pulse\_us()} cuánto dura el pulso de \texttt{ECHO} y aplica la velocidad
 del sonido, 343 metros por segundo, dividiendo entre dos porque el sonido recorre el
@@ -278,7 +281,7 @@ reporta como cero.
     \label{fig:main_py}
 \end{figure}
 
-El intervalo entre lecturas arrancó en cinco segundos, como se ve en la figura, y
+El intervalo entre lecturas arrancó en cinco segundos, como se ve en esa misma figura, y
 después se bajó a medio segundo. Con cinco segundos la gráfica de Grafana quedaba
 con puntos demasiado separados y el trazo parecía una línea recta entre dos
 mediciones lejanas.
@@ -302,16 +305,18 @@ enviarlos al broker mosquitto. Siga la siguiente nomenclatura para los tópicos
 \texttt{/NombreGrupo/distancia}, \texttt{/NombreGrupo/temperatura},
 \texttt{/NombreGrupo/humedad}. Visualice sus tópicos en Grafana. (5 puntos)}
 
-\textbf{Prueba previa contra el broker.} Antes de conectar la placa se corrió un
-script que publicaba valores generados en el momento, solo para comprobar que el
-cliente se autenticaba contra Mosquitto y que los tres tópicos llegaban. Esa prueba
-dejó claro que la parte de red estaba resuelta, de modo que cualquier falla posterior
-tenía que venir de la placa o del puerto serial.
+\textbf{Prueba previa contra el broker.} Antes de conectar el sensor se corrió un
+script que publicaba números aleatorios en los tres tópicos. Las distancias, las
+temperaturas y las humedades de la Figura~\ref{fig:telemetria} no salen de ninguna
+medición, las genera el propio script. El objetivo era comprobar que el cliente se
+autenticaba contra Mosquitto y que los tópicos llegaban, de modo que cualquier falla
+posterior tenía que venir de la placa o del puerto serial y no de la red.
 
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.85\linewidth]{img/telemetria_broker.png}
-    \caption{Prueba de publicación con valores generados, antes de conectar la placa.}
+    \caption{Prueba del enlace con el broker usando números aleatorios, antes de
+    conectar el sensor.}
     \label{fig:telemetria}
 \end{figure}
 
@@ -326,7 +331,7 @@ Los otros dos tópicos de la nomenclatura llevan un valor fijo de 25,0 y 60,0. E
 más, así que no había de dónde sacar temperatura ni humedad reales. Los tópicos se
 mantienen publicándose para respetar el esquema de nombres que pide el enunciado, y
 quedan marcados como simulados en el propio código para que no se confundan con una
-medición.
+medición (Figura~\ref{fig:puente_py}).
 
 \begin{figure}[ht!]
     \centering
@@ -349,9 +354,9 @@ mismo entorno, junto con \texttt{pyserial} (Figura~\ref{fig:paho}).
 \pagebreak
 
 Con la dependencia resuelta, el puente quedó publicando una medición cada medio
-segundo. La advertencia sobre la versión 1 de la API de \textit{callbacks} que
-aparece al arrancar no interrumpe nada, solo avisa que \texttt{mqtt.Client()} sin
-argumentos usa la interfaz anterior de la librería.
+segundo (Figura~\ref{fig:publicacion}). La advertencia sobre la versión 1 de la API
+de \textit{callbacks} que aparece al arrancar no interrumpe nada, solo avisa que
+\texttt{mqtt.Client()} sin argumentos usa la interfaz anterior de la librería.
 
 \begin{figure}[ht!]
     \centering
@@ -360,16 +365,26 @@ argumentos usa la interfaz anterior de la librería.
     \label{fig:publicacion}
 \end{figure}
 
+Las lecturas que salen por la terminal corresponden a objetos colocados a pocos
+centímetros del sensor, como se aprecia en la Figura~\ref{fig:montaje_publicando}.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.40\linewidth]{img/montaje_publicando.jpg}
+    \caption{Montaje publicando al broker, con la salida del puente en la pantalla.}
+    \label{fig:montaje_publicando}
+\end{figure}
+
 \textbf{Visualización en Grafana.} En Grafana se agregó la fuente de datos MQTT
 apuntando al broker local y se armó un panel sobre el tópico
 \texttt{/Grupo1/distancia}~\cite{mqttdatasource}. La gráfica responde en vivo al
-movimiento de la mano frente al sensor
+movimiento de un objeto frente al sensor
 (Figura~\ref{fig:panel}). El valor señalado en el panel, 27,8 centímetros a las
 10:14:26, corresponde a una de las lecturas publicadas por el puente.
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.58\linewidth]{img/panel_distancia.png}
+    \includegraphics[width=0.46\linewidth]{img/panel_distancia.png}
     \caption{Panel de Grafana con la serie del tópico \texttt{/Grupo1/distancia}.}
     \label{fig:panel}
 \end{figure}
@@ -377,12 +392,25 @@ movimiento de la mano frente al sensor
 Los valores altos aislados que se ven en la serie, por encima de los 300 centímetros,
 no son un error del montaje. Ocurren cuando el pulso de ultrasonido no encuentra una
 superficie perpendicular y rebota contra algo lejano antes de volver, de modo que el
-tiempo de vuelo medido es mayor que el real. Con la mano quieta frente al sensor la
+tiempo de vuelo medido es mayor que el real. Con el objeto quieto frente al sensor la
 serie se mantiene estable.
+
+La relación entre lo que ocurre sobre la mesa y lo que dibuja el panel se ve mejor en
+la Figura~\ref{fig:respuesta_sensor}. Los tramos planos de la serie corresponden al
+objeto sostenido a una distancia fija, y los saltos a los momentos en que se acerca o
+se aleja del sensor. La Figura~\ref{fig:montaje_grafana} muestra el mismo puesto de
+trabajo visto de frente, con el panel actualizándose mientras el puente publica.
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.30\linewidth]{img/montaje_grafana.jpg}
+    \includegraphics[width=0.40\linewidth]{img/respuesta_sensor.jpg}
+    \caption{Respuesta del panel al acercar un objeto al sensor.}
+    \label{fig:respuesta_sensor}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.26\linewidth]{img/montaje_grafana.jpg}
     \caption{Montaje en funcionamiento con el panel de Grafana actualizándose.}
     \label{fig:montaje_grafana}
 \end{figure}
