@@ -58,34 +58,14 @@
 
 El laboratorio anterior dejó un broker Mosquitto funcionando y la comprobación de
 que los mensajes llegaban de una máquina a otra. Lo que faltaba era ver esos datos.
-Una línea de texto en una terminal basta para confirmar que el enlace funciona, pero
+Una línea de texto en una terminal bastaría para confirmar que el enlace funciona, pero
 no deja ver una tendencia ni comparar dos momentos. Grafana resuelve esa parte
 leyendo de una fuente de datos y dibujando la serie en el tiempo~\cite{grafanadocs}.
 
 La guía plantea el montaje sobre una Raspberry Pi con un sensor de ultrasonido
 conectado a sus pines GPIO. El laboratorio no tenía Raspberry Pi disponible el día de
 la práctica, así que el sensor se montó sobre una placa ESP32 con su tarjeta de
-expansión, y toda la parte de servidor quedó en el PC de la mesa con Linux Mint. La
-tabla siguiente resume lo que se usó.
-
-\begin{center}
-\small
-\begin{tabular}{ll}
-\hline
-\textbf{Elemento} & \textbf{Detalle} \\
-\hline
-Equipo de trabajo    & PC de la mesa, Linux Mint sobre Ubuntu 24.04 \\
-Placa                & ESP32 con tarjeta de expansión, puerto \texttt{/dev/ttyUSB0} \\
-Firmware de la placa & MicroPython \texttt{ESP32\_GENERIC} v1.23.0 \\
-Sensor               & Ultrasonido HC-SR04 sobre protoboard \\
-Contenedores         & Docker 29.9.0 y Docker Compose v5.6.0 \\
-Imágenes             & \texttt{prom/prometheus:latest} y \texttt{grafana/grafana} \\
-Broker               & Mosquitto del laboratorio 5, puerto 1883 \\
-Herramientas Python  & \texttt{esptool} y \texttt{mpremote} para la placa \\
-                     & \texttt{pyserial} y \texttt{paho-mqtt} para el puente \\
-\hline
-\end{tabular}
-\end{center}
+expansión, y toda la parte de servidor quedó en el PC de la mesa con Linux Mint. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Instalación del entorno}
@@ -93,8 +73,7 @@ Herramientas Python  & \texttt{esptool} y \texttt{mpremote} para la placa \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actualización del sistema y servicio de tiempo}
 
-El primer paso fue actualizar los paquetes e instalar \texttt{ntpsec}. El servicio de
-tiempo no es un adorno en este laboratorio. Grafana ubica cada punto de la serie
+El primer paso fue actualizar los paquetes e instalar \texttt{ntpsec}. Grafana ubica cada punto de la serie
 según la marca de tiempo con la que llega, de modo que un reloj desfasado en el
 equipo desplaza la gráfica completa y hace imposible comparar lo que publican dos
 máquinas distintas.
@@ -172,10 +151,9 @@ chmod 755 *
 docker compose up -d
 \end{lstlisting}
 
-La descarga de las dos imágenes tomó algo más de un minuto y medio, y los
+La descarga de las dos imágenes tomó un minuto y medio, y los
 contenedores quedaron levantados a la primera (Figura~\ref{fig:contenedores}).
-Prometheus se instaló por indicación de la guía aunque este laboratorio no lo use,
-porque queda disponible para las prácticas siguientes.
+Prometheus se instaló aunque no se usó en el laboratorio.
 
 \begin{figure}[ht!]
     \centering
@@ -208,8 +186,7 @@ cambiar la contraseña \texttt{admin} que trae por defecto.
 Python que sea capaz de recibir los datos enviados por el sensor. Muestre el circuito
 en Fritzing. (5 puntos)}
 
-El montaje se hizo sobre hardware real y no en Fritzing, de modo que el circuito queda
-documentado con la fotografía del armado (Figura~\ref{fig:montaje_sensor}). El HC-SR04
+El montaje se hizo sobre hardware real y no en Fritzing, el circuito se ve en la (Figura~\ref{fig:montaje_sensor}). El HC-SR04
 tiene cuatro terminales. \texttt{VCC} y \texttt{GND} toman la alimentación de los
 rieles de la protoboard, \texttt{TRIG} recibe el pulso que dispara la medición y
 \texttt{ECHO} devuelve un pulso cuya duración es proporcional al tiempo de vuelo del
@@ -486,11 +463,6 @@ Eclipse Foundation, ``Eclipse Paho MQTT Python Client,'' 2024. [En línea].
 Disponible:
 \url{https://eclipse.dev/paho/index.php?page=clients/python/index.php}.
 [Consulta: oct.~2026]
-
-\bibitem{guialab}
-A.~Russoniello, ``Laboratorio: Visualización de Datos con Grafana,'' guía de práctica
-de laboratorio, Laboratorio General (Internet de las Cosas), Escuela de Computación,
-Facultad de Ciencias, Universidad Central de Venezuela, Caracas, 2026.
 
 \end{thebibliography}
 \endgroup
