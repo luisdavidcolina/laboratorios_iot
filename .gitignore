@@ -6,3 +6,6 @@
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+
+proyecto-cuna/.env.local
+proyecto-cuna/.vercel/
