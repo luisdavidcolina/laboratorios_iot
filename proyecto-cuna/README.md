@@ -2,6 +2,18 @@
 
 Proyecto final de Luisdavid Colina. Solo simulación, en Wokwi, con panel web y MQTT.
 
+## Enlaces
+
+| Recurso | Enlace |
+|---|---|
+| Panel web | [proyecto-cuna.vercel.app](https://proyecto-cuna.vercel.app) |
+| Diapositivas | [cuna-iot-diapositivas.vercel.app](https://cuna-iot-diapositivas.vercel.app) |
+| Repositorio | [luisdavidcolina/laboratorios_iot](https://github.com/luisdavidcolina/laboratorios_iot) |
+
+El panel y las diapositivas se despliegan automáticamente en Vercel cuando se hace
+`push` a la rama `main`. Samantha puede trabajar desde su propio computador sin
+depender de este equipo.
+
 ## Qué hay en la carpeta
 
 | Archivo | Para qué sirve |
@@ -11,6 +23,59 @@ Proyecto final de Luisdavid Colina. Solo simulación, en Wokwi, con panel web y 
 | `libraries.txt` | Librerías que Wokwi debe instalar |
 | `panel/index.html` | Panel web para el celular o el computador |
 | `panel/mqtt.min.js` | Librería MQTT local, para no depender de internet salvo el broker |
+| `expo/index.html` | Presentación web del proyecto |
+| `expo/assets/` | Estilos, fuentes, imágenes y código de las diapositivas |
+| `pruebas/` | Escenarios de prueba documentados |
+| `informe/` | Informe académico en PDF y fuente LaTeX |
+
+El repositorio contiene dos proyectos de Vercel dentro de la misma carpeta:
+
+| Proyecto Vercel | Carpeta raíz | Salida |
+|---|---|---|
+| `proyecto-cuna` | `proyecto-cuna/` | Panel web |
+| `cuna-iot-diapositivas` | `proyecto-cuna/expo/` | Diapositivas |
+
+## Flujo de trabajo con Git
+
+Clonar el repositorio y entrar en la carpeta del proyecto:
+
+```bash
+git clone https://github.com/luisdavidcolina/laboratorios_iot.git
+cd laboratorios_iot/proyecto-cuna
+```
+
+Después de realizar cambios:
+
+```bash
+git status
+git add .
+git commit -m "Describe el cambio"
+git push origin main
+```
+
+No se deben subir `.env.local` ni las carpetas `.vercel/`; están excluidas por
+`.gitignore`. Los cambios de `diagram.json` deben estar completos y probados en
+Wokwi antes de hacer `push`.
+
+## Probar localmente
+
+El panel y las diapositivas son archivos estáticos, por lo que pueden abrirse
+directamente en el navegador:
+
+```text
+panel/index.html
+expo/index.html
+```
+
+Para evitar restricciones del navegador con archivos locales, también se puede
+usar un servidor estático:
+
+```bash
+python -m http.server 8000
+```
+
+Luego abrir `http://localhost:8000/panel/` o
+`http://localhost:8000/expo/`.
 
 ## Cómo montarlo en Wokwi
 
