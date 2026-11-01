@@ -3,257 +3,124 @@
   "author": "Luisdavid Colina",
   "editor": "wokwi",
   "parts": [
-    {
-      "type": "board-esp32-devkit-c-v4",
-      "id": "esp",
-      "top": 100,
-      "left": 290,
-      "attrs": {}
-    },
-    {
-      "type": "wokwi-text",
-      "id": "lbl_in",
-      "top": -20,
-      "left": 20,
-      "attrs": { "text": "── ENTRADAS ──────────────────────────────────────────────" }
-    },
-    {
-      "type": "wokwi-slide-potentiometer",
-      "id": "sound",
-      "top": 20,
-      "left": 30,
-      "attrs": { "travelLength": "30" }
-    },
-    {
-      "type": "wokwi-text",
-      "id": "t_sound",
-      "top": 5,
-      "left": 100,
-      "attrs": { "text": "Sonido (pin 34)" }
-    },
-    {
-      "type": "wokwi-slide-potentiometer",
-      "id": "weight",
-      "top": 100,
-      "left": 30,
-      "attrs": { "travelLength": "30" }
-    },
-    {
-      "type": "wokwi-text",
-      "id": "t_weight",
-      "top": 85,
-      "left": 100,
-      "attrs": { "text": "Peso (pin 33)" }
-    },
-    {
-      "type": "wokwi-slide-potentiometer",
-      "id": "gas",
-      "top": 180,
-      "left": 30,
-      "attrs": { "travelLength": "30" }
-    },
-    {
-      "type": "wokwi-text",
-      "id": "t_gas",
-      "top": 165,
-      "left": 100,
-      "attrs": { "text": "Gas (pin 35)" }
-    },
-    {
-      "type": "wokwi-slide-potentiometer",
-      "id": "wet",
-      "top": 260,
-      "left": 30,
-      "attrs": { "travelLength": "30" }
-    },
-    {
-      "type": "wokwi-text",
-      "id": "t_wet",
-      "top": 245,
-      "left": 100,
-      "attrs": { "text": "Pañal (pin 32)" }
-    },
-    {
-      "type": "wokwi-dht22",
-      "id": "dht",
-      "top": 340,
-      "left": 30,
-      "attrs": { "temperature": "24", "humidity": "55" }
-    },
-    {
-      "type": "wokwi-mpu6050",
-      "id": "mpu",
-      "top": 440,
-      "left": 30,
-      "attrs": {}
-    },
-    {
-      "type": "wokwi-text",
-      "id": "lbl_btn",
-      "top": -20,
-      "left": 700,
-      "attrs": { "text": "── BOTONES DE SIMULACIÓN ─────────────────────────────────" }
-    },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "btn_cry",
-      "top": 20,
-      "left": 720,
-      "attrs": { "color": "red", "label": "Llanto" }
-    },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "btn_wet",
-      "top": 100,
-      "left": 720,
-      "attrs": { "color": "blue", "label": "Panal mojado" }
-    },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "btn_gas",
-      "top": 180,
-      "left": 720,
-      "attrs": { "color": "orange", "label": "Gas" }
-    },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "btn_baby",
-      "top": 260,
-      "left": 720,
-      "attrs": { "color": "green", "label": "Bebe en la cuna" }
-    },
-    {
-      "type": "wokwi-text",
-      "id": "lbl_out",
-      "top": 560,
-      "left": 20,
-      "attrs": { "text": "── SALIDAS ───────────────────────────────────────────────" }
-    },
-    {
-      "type": "wokwi-servo",
-      "id": "servo",
-      "top": 600,
-      "left": 30,
-      "attrs": {}
-    },
-    {
-      "type": "wokwi-text",
-      "id": "t_servo",
-      "top": 585,
-      "left": 130,
-      "attrs": { "text": "Servo - mece la cuna (pin 18)" }
-    },
-    {
-      "type": "wokwi-relay-module",
-      "id": "relay",
-      "top": 600,
-      "left": 380,
-      "attrs": {}
-    },
-    {
-      "type": "wokwi-resistor",
-      "id": "r2",
-      "top": 600,
-      "left": 590,
-      "attrs": { "value": "220" }
-    },
-    {
-      "type": "wokwi-led",
-      "id": "ledfan",
-      "top": 600,
-      "left": 680,
-      "attrs": { "color": "green", "label": "Ventilador" }
-    },
-    {
-      "type": "wokwi-resistor",
-      "id": "r1",
-      "top": 680,
-      "left": 380,
-      "attrs": { "value": "220" }
-    },
-    {
-      "type": "wokwi-led",
-      "id": "ledalert",
-      "top": 680,
-      "left": 490,
-      "attrs": { "color": "red", "label": "Alerta" }
-    },
-    {
-      "type": "wokwi-buzzer",
-      "id": "bz",
-      "top": 680,
-      "left": 600,
-      "attrs": { "volume": "0.1" }
-    },
-    {
-      "type": "board-ssd1306",
-      "id": "oled",
-      "top": 600,
-      "left": 720,
-      "attrs": { "i2cAddress": "0x3c" }
-    }
+
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 220, "left": 370, "attrs": {} },
+
+    { "type": "wokwi-text", "id": "lbl_cuna",  "top": 10,  "left": 10, "attrs": { "text": "CUNA  ─────────────────────────────────────────────────────" } },
+    { "type": "wokwi-text", "id": "lbl_bebe",  "top": 28,  "left": 10, "attrs": { "text": "  bebé · pañal · temperatura · movimiento" } },
+
+    { "type": "wokwi-dht22",   "id": "dht",   "top": 60,  "left": 10, "attrs": { "temperature": "24", "humidity": "55" } },
+    { "type": "wokwi-text",    "id": "t_dht",  "top": 60,  "left": 120,"attrs": { "text": "Temp / Humedad (pin 15)" } },
+
+    { "type": "wokwi-mpu6050", "id": "mpu",   "top": 160, "left": 10, "attrs": {} },
+    { "type": "wokwi-text",    "id": "t_mpu",  "top": 160, "left": 120,"attrs": { "text": "Movimiento de la cuna (pins 21-22)" } },
+
+    { "type": "board-ssd1306", "id": "oled",  "top": 270, "left": 10, "attrs": { "i2cAddress": "0x3c" } },
+    { "type": "wokwi-text",    "id": "t_oled", "top": 270, "left": 120,"attrs": { "text": "Pantalla OLED (pins 21-22, I2C)" } },
+
+    { "type": "wokwi-servo",   "id": "servo", "top": 390, "left": 10, "attrs": {} },
+    { "type": "wokwi-text",    "id": "t_servo","top": 390, "left": 120,"attrs": { "text": "Servo – mece la cuna (pin 18)" } },
+
+    { "type": "wokwi-text", "id": "lbl_sal",  "top": 490, "left": 10, "attrs": { "text": "SALIDAS  ──────────────────────────────────────────────────" } },
+
+    { "type": "wokwi-relay-module", "id": "relay",    "top": 530, "left": 10,  "attrs": {} },
+    { "type": "wokwi-resistor",     "id": "r2",       "top": 530, "left": 170, "attrs": { "value": "220" } },
+    { "type": "wokwi-led",          "id": "ledfan",   "top": 530, "left": 240, "attrs": { "color": "green", "label": "Ventilador" } },
+    { "type": "wokwi-text",         "id": "t_fan",    "top": 515, "left": 300, "attrs": { "text": "Ventilador (pin 26 → relé → LED)" } },
+
+    { "type": "wokwi-resistor",     "id": "r1",       "top": 620, "left": 10,  "attrs": { "value": "220" } },
+    { "type": "wokwi-led",          "id": "ledalert", "top": 620, "left": 80,  "attrs": { "color": "red",   "label": "Alerta" } },
+    { "type": "wokwi-text",         "id": "t_alert",  "top": 605, "left": 140, "attrs": { "text": "LED alerta (pin 27)" } },
+
+    { "type": "wokwi-buzzer",       "id": "bz",       "top": 700, "left": 10,  "attrs": { "volume": "0.1" } },
+    { "type": "wokwi-text",         "id": "t_bz",     "top": 700, "left": 120, "attrs": { "text": "Buzzer (pin 25)" } },
+
+    { "type": "wokwi-text", "id": "lbl_sim",  "top": 10,  "left": 800, "attrs": { "text": "SIMULACIÓN  ────────────────────────────────────────────────" } },
+    { "type": "wokwi-text", "id": "lbl_sim2", "top": 28,  "left": 800, "attrs": { "text": "  reemplazan micrófono, balanza, MQ2 y sensor de humedad" } },
+
+    { "type": "wokwi-text", "id": "lbl_sl",   "top": 60,  "left": 800, "attrs": { "text": "Deslizantes ─ entradas analógicas" } },
+
+    { "type": "wokwi-slide-potentiometer", "id": "sound",  "top": 100, "left": 800, "attrs": { "travelLength": "30" } },
+    { "type": "wokwi-text", "id": "t_sound",  "top": 100,  "left": 910, "attrs": { "text": "Sonido / llanto (pin 34)" } },
+
+    { "type": "wokwi-slide-potentiometer", "id": "weight", "top": 180, "left": 800, "attrs": { "travelLength": "30" } },
+    { "type": "wokwi-text", "id": "t_weight", "top": 180,  "left": 910, "attrs": { "text": "Peso del bebé 0-8 kg (pin 33)" } },
+
+    { "type": "wokwi-slide-potentiometer", "id": "gas",    "top": 260, "left": 800, "attrs": { "travelLength": "30" } },
+    { "type": "wokwi-text", "id": "t_gas",    "top": 260,  "left": 910, "attrs": { "text": "Gas / humo (pin 35)" } },
+
+    { "type": "wokwi-slide-potentiometer", "id": "wet",    "top": 340, "left": 800, "attrs": { "travelLength": "30" } },
+    { "type": "wokwi-text", "id": "t_wet",    "top": 340,  "left": 910, "attrs": { "text": "Humedad del pañal (pin 32)" } },
+
+    { "type": "wokwi-text", "id": "lbl_btn",  "top": 440,  "left": 800, "attrs": { "text": "Botones ─ activan situaciones de prueba" } },
+
+    { "type": "wokwi-pushbutton", "id": "btn_cry",  "top": 480, "left": 800, "attrs": { "color": "red",    "label": "Llanto" } },
+    { "type": "wokwi-pushbutton", "id": "btn_wet",  "top": 560, "left": 800, "attrs": { "color": "blue",   "label": "Panal mojado" } },
+    { "type": "wokwi-pushbutton", "id": "btn_gas",  "top": 640, "left": 800, "attrs": { "color": "orange", "label": "Gas" } },
+    { "type": "wokwi-pushbutton", "id": "btn_baby", "top": 720, "left": 800, "attrs": { "color": "green",  "label": "Bebe en la cuna" } }
+
   ],
   "connections": [
     ["esp:TX", "$serialMonitor:RX", "", []],
     ["esp:RX", "$serialMonitor:TX", "", []],
 
-    ["dht:VCC",  "esp:3V3",   "red",   []],
-    ["dht:GND",  "esp:GND.1", "black", []],
+    ["dht:VCC",  "esp:3V3",   "red",   ["v:-10", "h:300"]],
+    ["dht:GND",  "esp:GND.1", "black", ["v:-5",  "h:305"]],
     ["dht:SDA",  "esp:15",    "green", []],
 
-    ["mpu:VCC",  "esp:3V3",   "red",    []],
-    ["mpu:GND",  "esp:GND.1", "black",  []],
+    ["mpu:VCC",  "esp:3V3",   "red",    ["v:-10", "h:220"]],
+    ["mpu:GND",  "esp:GND.1", "black",  ["v:-5",  "h:225"]],
     ["mpu:SDA",  "esp:21",    "blue",   []],
     ["mpu:SCL",  "esp:22",    "yellow", []],
 
-    ["oled:VCC", "esp:3V3",   "red",    []],
-    ["oled:GND", "esp:GND.1", "black",  []],
+    ["oled:VCC", "esp:3V3",   "red",    ["v:-10", "h:220"]],
+    ["oled:GND", "esp:GND.1", "black",  ["v:-5",  "h:225"]],
     ["oled:SDA", "esp:21",    "blue",   []],
     ["oled:SCL", "esp:22",    "yellow", []],
 
-    ["sound:VCC", "esp:3V3",   "red",   []],
-    ["sound:GND", "esp:GND.1", "black", []],
-    ["sound:SIG", "esp:34",    "green", []],
-
-    ["weight:VCC", "esp:3V3",   "red",   []],
-    ["weight:GND", "esp:GND.1", "black", []],
-    ["weight:SIG", "esp:33",    "green", []],
-
-    ["gas:VCC", "esp:3V3",   "red",   []],
-    ["gas:GND", "esp:GND.1", "black", []],
-    ["gas:SIG", "esp:35",    "green", []],
-
-    ["wet:VCC", "esp:3V3",   "red",   []],
-    ["wet:GND", "esp:GND.1", "black", []],
-    ["wet:SIG", "esp:32",    "green", []],
-
-    ["servo:V+",  "esp:5V",    "red",    []],
-    ["servo:GND", "esp:GND.1", "black",  []],
+    ["servo:V+",  "esp:5V",    "red",    ["h:30", "v:20"]],
+    ["servo:GND", "esp:GND.1", "black",  ["h:32", "v:25"]],
     ["servo:PWM", "esp:18",    "orange", []],
 
-    ["relay:VCC", "esp:5V",    "red",    []],
-    ["relay:GND", "esp:GND.1", "black",  []],
-    ["relay:IN",  "esp:26",    "orange", []],
-    ["relay:COM", "esp:3V3",   "red",    []],
+    ["relay:VCC", "esp:5V",    "red",    ["h:20", "v:-320"]],
+    ["relay:GND", "esp:GND.1", "black",  ["h:22", "v:-315"]],
+    ["relay:IN",  "esp:26",    "orange", ["h:-10","v:-250"]],
+    ["relay:COM", "esp:3V3",   "red",    ["h:18", "v:-320"]],
     ["relay:NO",  "r2:2",      "green",  []],
     ["r2:1",      "ledfan:A",  "green",  []],
-    ["ledfan:C",  "esp:GND.1", "black",  []],
+    ["ledfan:C",  "esp:GND.1", "black",  ["h:140","v:-315"]],
 
-    ["esp:27",    "r1:1",       "red",   []],
+    ["esp:27",    "r1:1",       "red",   ["h:-350","v:390"]],
     ["r1:2",      "ledalert:A", "red",   []],
-    ["ledalert:C","esp:GND.1",  "black", []],
+    ["ledalert:C","esp:GND.1",  "black", ["h:290", "v:-315"]],
 
-    ["bz:2", "esp:25",    "purple", []],
-    ["bz:1", "esp:GND.1", "black",  []],
+    ["bz:2",     "esp:25",    "purple", ["h:-350","v:470"]],
+    ["bz:1",     "esp:GND.1", "black",  ["h:360", "v:-315"]],
+
+    ["sound:VCC", "esp:3V3",   "red",   ["h:-20","v:130"]],
+    ["sound:GND", "esp:GND.1", "black", ["h:-18","v:135"]],
+    ["sound:SIG", "esp:34",    "green", []],
+
+    ["weight:VCC", "esp:3V3",   "red",   ["h:-20","v:50"]],
+    ["weight:GND", "esp:GND.1", "black", ["h:-18","v:55"]],
+    ["weight:SIG", "esp:33",    "green", []],
+
+    ["gas:VCC", "esp:3V3",   "red",   ["h:-20","v:-30"]],
+    ["gas:GND", "esp:GND.1", "black", ["h:-18","v:-25"]],
+    ["gas:SIG", "esp:35",    "green", []],
+
+    ["wet:VCC", "esp:3V3",   "red",   ["h:-20","v:-110"]],
+    ["wet:GND", "esp:GND.1", "black", ["h:-18","v:-105"]],
+    ["wet:SIG", "esp:32",    "green", []],
 
     ["btn_cry:1.l",  "esp:13",    "red",    []],
-    ["btn_cry:2.l",  "esp:GND.1", "black",  []],
+    ["btn_cry:2.l",  "esp:GND.1", "black",  ["h:-20","v:-260"]],
     ["btn_wet:1.l",  "esp:14",    "blue",   []],
-    ["btn_wet:2.l",  "esp:GND.1", "black",  []],
+    ["btn_wet:2.l",  "esp:GND.1", "black",  ["h:-20","v:-340"]],
     ["btn_gas:1.l",  "esp:16",    "orange", []],
-    ["btn_gas:2.l",  "esp:GND.1", "black",  []],
+    ["btn_gas:2.l",  "esp:GND.1", "black",  ["h:-20","v:-420"]],
     ["btn_baby:1.l", "esp:17",    "green",  []],
-    ["btn_baby:2.l", "esp:GND.1", "black",  []]
+    ["btn_baby:2.l", "esp:GND.1", "black",  ["h:-20","v:-500"]]
   ],
   "dependencies": {}
 }
