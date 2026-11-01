@@ -1,0 +1,419 @@
+% !TeX spellcheck = es_VE
+% !TeX root = Informe.tex
+\input{../../templates/plantilla_base.tex}
+\usepackage[T1]{fontenc}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc,backgrounds}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{fancy}
+\fancyhf{}
+
+\setlength{\headheight}{80pt}
+\addtolength{\topmargin}{-35pt}
+\setlength{\headsep}{1cm}
+\setlength{\footskip}{20pt}
+
+\rhead{\includegraphics[width=1.3cm]{../../img/logo_ciencias.png}}
+\lhead{\includegraphics[width=1.4cm]{../../img/logo_ucv.png}}
+\cfoot{\thepage}
+\rfoot{Noviembre, 2026}
+
+\chead{Laboratorio de Internet de las Cosas}
+\newcommand{\titulo}{PROYECTO FINAL}
+\newcommand{\subtitulo}{Cuna inteligente con ESP32, MQTT y panel web}
+\newcommand{\autorUno}{Luisdavid Colina V24766381}
+
+% Las capturas van en la misma carpeta que el .tex para que \includegraphics las encuentre
+\graphicspath{{./}{../vista_previa/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\begin{center}
+  {\Large \textbf{\titulo}} \\[0.3cm]
+  {\large \textbf{\subtitulo}} \\[0.8cm]
+
+  \small
+  \begin{tabular}{c}
+    \textbf{Preparado por:} \\
+    \autorUno \\
+  \end{tabular}
+  \\[1cm]
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Planteamiento}
+
+Quien cuida a un bebé no puede estar siempre junto a la cuna. Durante la noche hay
+tres situaciones que piden atención inmediata: el llanto, el pañal mojado y un cuarto
+demasiado caliente o demasiado frío. Una cuna común no avisa de ninguna de las tres.
+
+El proyecto propone una cuna que detecta esas situaciones, responde por sí sola con
+un movimiento suave y avisa a los padres desde el teléfono. El trabajo se realizó
+completo en simulación sobre Wokwi, con una placa ESP32 y un broker MQTT público.
+
+Los objetivos son los siguientes.
+
+\begin{enumerate}[label=\arabic*.]
+  \item Detectar el llanto y mecer la cuna con una intensidad que crece si el llanto
+        continúa.
+  \item Medir la temperatura y la humedad del cuarto y controlar un ventilador.
+  \item Avisar al teléfono cuando el pañal se moja, hay gas o humo, o el llanto se
+        prolonga.
+  \item Permitir mecer la cuna y manejar el ventilador a distancia desde un panel web.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Antecedentes}
+
+Las cunas inteligentes son un tema frecuente en proyectos de IoT. Una lista de
+proyectos para estudiantes de ingeniería incluye la cuna que mece al detectar el
+llanto y vigila la temperatura del cuarto~\cite{robocraze}. Un proyecto publicado en
+Intel DevMesh usa un ESP32 con un sensor de sonido, un DHT11 y un motor que inclina
+la cuna, con alertas por la aplicación Blynk~\cite{devmesh}. Un proyecto de grado de
+la Universidad Nacional An-Najah añade un sensor de humedad para el pañal, un
+ventilador que se enciende cuando el cuarto supera los 30~°C y el control remoto del
+mecido desde una aplicación~\cite{najah}.
+
+Un artículo de 2025 describe un sistema más completo. Reporta niveles de balanceo del
+1 al 5, parada automática del balanceo a los cinco minutos, un rango seguro de
+temperatura de 20 a 25~°C con enfriamiento por encima y calefacción por
+debajo, y un panel con historial y control remoto~\cite{pmc}. El mismo artículo
+presenta cifras de exactitud que no son consistentes entre sus secciones, por lo que
+este informe toma de él solo los parámetros de diseño y no sus resultados.
+
+Un artículo de 2026 sobre una cuna con ESP32 y Blynk describe que el controlador
+separa los ruidos breves del llanto verdadero para no mecer con cada sonido, y que la
+cuna empieza a moverse en menos de 2,5 segundos tras confirmar el llanto~\cite{ijirt}.
+De ahí sale la condición de duración mínima que usa este proyecto.
+
+La cuna de este informe toma esos parámetros y añade tres elementos: un
+escalonamiento de la respuesta según cuánto dura el llanto, un control con histéresis
+para el ventilador y un panel que se maneja por MQTT con las mismas órdenes que
+entiende el programa.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Diseño del sistema}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Arquitectura}
+
+El ESP32 lee los sensores y maneja los actuadores. Cada dos segundos publica su estado
+en un broker MQTT, y el panel web se suscribe a ese estado para mostrarlo. Las
+órdenes hacen el camino inverso: el panel publica en un tópico de comandos y el ESP32
+las recibe. La figura~\ref{fig:arq} resume el flujo.
+
+\begin{figure}[ht!]
+\centering
+\begin{tikzpicture}[
+  node distance=7mm and 12mm,
+  box/.style={draw, rounded corners=2pt, minimum height=8mm, align=center, font=\small, fill=white},
+  grp/.style={draw, rounded corners=4pt, inner sep=6pt, fill=gray!8},
+  arr/.style={-{Stealth[length=2mm]}, thick}
+]
+  \node[box] (dht) {DHT22};
+  \node[box, below=of dht] (mpu) {MPU6050};
+  \node[box, below=of mpu] (sl) {Sonido, peso,\\gas y pañal};
+  \node[box, right=22mm of mpu, minimum height=50mm, minimum width=24mm, fill=blue!8] (esp) {ESP32};
+  \node[box, above right=0mm and 22mm of esp] (servo) {Servo};
+  \node[box, below=of servo] (rele) {Relé y\\ventilador};
+  \node[box, below=of rele] (otros) {Buzzer, LED\\y OLED};
+  \node[box, right=26mm of rele, fill=orange!12] (broker) {Broker MQTT\\HiveMQ};
+  \node[box, right=14mm of broker, fill=green!10] (panel) {Panel web\\en el teléfono};
+
+  \draw[arr] (dht) -- (esp.west |- dht);
+  \draw[arr] (mpu) -- (esp);
+  \draw[arr] (sl) -- (esp.west |- sl);
+  \draw[arr] (esp.east |- servo) -- (servo);
+  \draw[arr] (esp.east |- rele) -- (rele);
+  \draw[arr] (esp.east |- otros) -- (otros);
+  \draw[arr] ([yshift=2mm]rele.east) -- node[above, font=\scriptsize]{estado} ([yshift=2mm]broker.west);
+  \draw[arr] ([yshift=-2mm]broker.west) -- node[below, font=\scriptsize]{órdenes} ([yshift=-2mm]rele.east);
+  \draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, thick] (broker) -- (panel);
+
+  \begin{scope}[on background layer]
+    \node[grp, fit=(dht)(mpu)(sl), label={[font=\scriptsize]above:Entradas}] {};
+    \node[grp, fit=(servo)(rele)(otros), label={[font=\scriptsize]above:Salidas}] {};
+  \end{scope}
+\end{tikzpicture}
+\caption{Arquitectura del sistema. El estado sube cada dos segundos y las órdenes
+bajan por un tópico distinto.}
+\label{fig:arq}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Componentes y conexiones}
+
+La tabla siguiente lista cada pieza del circuito, la magnitud que mide o la acción que
+realiza, y el pin del ESP32 al que se conecta.
+
+\begin{center}
+\small
+\begin{tabular}{llc}
+\hline
+\textbf{Pieza} & \textbf{Función} & \textbf{Pin} \\
+\hline
+DHT22                  & Temperatura y humedad del cuarto & 15 \\
+MPU6050                & Movimiento de la cuna, por I2C   & 21 y 22 \\
+Pantalla OLED SSD1306  & Estado de la cuna, por I2C       & 21 y 22 \\
+Deslizante Sonido      & Nivel de ruido, de 0 a 4095      & 34 \\
+Deslizante Peso        & Peso sobre el colchón, de 0 a 8 kg & 33 \\
+Deslizante Gas         & Concentración de gas o humo      & 35 \\
+Deslizante Pañal       & Humedad del pañal                & 32 \\
+Servo                  & Mece la cuna                     & 18 \\
+Módulo relé            & Enciende el ventilador           & 26 \\
+LED rojo               & Alerta de llanto, pañal o gas    & 27 \\
+Buzzer                 & Avisos sonoros                   & 25 \\
+\hline
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sustituciones por las limitaciones del simulador}
+
+La documentación de Wokwi no incluye un sensor de sonido entre sus piezas. Incluye el
+amplificador de celdas de carga HX711, pero su valor solo se controla desde escenarios
+de automatización y no con un control que se mueva a mano durante la
+demostración~\cite{wokwihx}. El sensor de gas MQ2 sí existe, pero solo permite fijar
+la concentración inicial~\cite{wokwigas}.
+
+Por eso las cuatro entradas que representan sonido, peso, gas y humedad del pañal son
+controles deslizantes que entregan un voltaje analógico. El programa las lee con el
+convertidor del ESP32 y las trata como lo haría con los sensores reales. En un
+montaje físico, el deslizante de sonido sería un micrófono con salida analógica, el de
+peso una celda de carga con HX711, el de gas un MQ2 y el del pañal un sensor de
+humedad. El resto de las piezas, como el DHT22, el MPU6050, el servo, el relé y la
+pantalla OLED, sí existen en el simulador y se usan tal cual.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Lógica de control}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Respuesta al llanto}
+
+El programa lee el sensor de sonido cada 200 ms, tomando el valor máximo de veinte
+muestras para no perder los picos. Un ruido alto aislado no cuenta como llanto. Debe
+mantenerse por encima del umbral durante dos segundos y, además, debe haber un bebé en
+la cuna según la lectura de peso. Cumplidas las dos condiciones, la cuna empieza a
+mecer con intensidad suave.
+
+Si el llanto continúa, la respuesta escala. Al minuto el mecido pasa a intensidad
+firme. A los tres minutos se avisa a los padres de un llanto prolongado, con una
+alarma sonora y un mensaje al panel. Cuando el sonido baja del umbral y se mantiene así
+durante veinte segundos, se da al bebé por calmado y el mecido se detiene. La
+figura~\ref{fig:estados} muestra la secuencia.
+
+\begin{figure}[ht!]
+\centering
+\begin{tikzpicture}[
+  st/.style={draw, rounded corners=3pt, minimum width=27mm, minimum height=9mm, align=center, font=\small, fill=white},
+  arr/.style={-{Stealth[length=2mm]}, thick},
+  lb/.style={font=\scriptsize, align=center}
+]
+  \node[st, fill=green!10] (calm) {Tranquilo};
+  \node[st, fill=orange!15, right=30mm of calm] (n1) {Llanto\\mecido suave};
+  \node[st, fill=orange!25, right=30mm of n1] (n2) {Llanto\\mecido firme};
+  \node[st, fill=red!15, right=30mm of n2] (alert) {Aviso a\\los padres};
+  \node[st, fill=gray!15, below=22mm of n1] (rest) {Descanso\\del mecido};
+
+  \draw[arr] (calm) -- node[below, lb]{ruido $\geq$ umbral\\por 2 s} (n1);
+  \draw[arr] (n1) -- node[above, lb]{llanto\\por 60 s} (n2);
+  \draw[arr] (n2) -- node[above, lb]{llanto\\por 180 s} (alert);
+  \draw[arr] (n1.north) to[bend right=35] node[above, lb]{silencio por 20 s} (calm.north west);
+  \draw[arr] (n1.south) -- node[right, lb]{mecido\\por 5 min} (rest.north);
+  \draw[arr] (n2.south) to[bend left=20] node[right, lb, pos=0.35]{mecido\\por 5 min} (rest.east);
+  \draw[arr] (n2.north) to[bend right=25] node[above, lb]{silencio por 20 s} (calm.north east);
+  \draw[arr] (rest.west) to[bend left=60] node[left, lb, pos=0.5]{tras 2 min,\\si sigue\\el llanto} (n1.south west);
+\end{tikzpicture}
+\caption{Estados de la respuesta al llanto. El mecido se detiene siempre a los cinco
+minutos y descansa dos minutos antes de poder reiniciarse solo. El aviso a los padres
+no detiene el mecido.}
+\label{fig:estados}
+\end{figure}
+
+El límite de cinco minutos aplica también cuando el balanceo se inicia a mano desde el
+panel. Si el bebé sale de la cuna, el programa da el llanto por terminado y detiene el
+mecido automático.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Ambiente del cuarto}
+
+El ventilador se enciende cuando la temperatura llega a 26~°C y se apaga al bajar a
+24,5~°C. La diferencia de un grado y medio entre los dos valores evita que el relé se
+active y se desactive sin parar cuando la temperatura oscila alrededor de un solo
+umbral. El panel permite además forzar el ventilador encendido o apagado.
+
+Se envía un aviso cuando la temperatura pasa de 28~°C o baja de 20~°C, y otro cuando
+la humedad cae por debajo de 40~\%. Cada aviso se emite una sola vez y se rearma
+cuando la medida vuelve a un margen seguro, de modo que el panel no se llena de
+mensajes repetidos.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Situación} & \textbf{Condición} & \textbf{Respuesta} \\
+\hline
+Llanto                 & Sonido alto por 2 s con bebé presente & Mecido suave \\
+Llanto sostenido       & 60 s de llanto                        & Mecido firme \\
+Llanto prolongado      & 180 s de llanto                       & Alarma y aviso \\
+Calma                  & 20 s bajo el umbral                   & Detiene el mecido \\
+Cuarto caliente        & 26~°C o más                           & Ventilador encendido \\
+Cuarto fresco          & 24,5~°C o menos                       & Ventilador apagado \\
+Temperatura fuera de rango & Más de 28~°C o menos de 20~°C     & Aviso \\
+Humedad baja           & Menos de 40~\%                        & Aviso \\
+Pañal mojado           & Lectura sobre el umbral               & Aviso y pitido \\
+Gas o humo             & Lectura sobre el umbral               & Aviso y alarma continua \\
+\hline
+\end{tabular}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Comunicación por MQTT}
+
+El ESP32 se conecta a la red virtual \texttt{Wokwi-GUEST}, que no pide contraseña y
+tiene salida a internet~\cite{wokwiwifi}. Desde ahí publica en el broker público de
+HiveMQ mediante la librería PubSubClient. Todos los tópicos cuelgan de
+\texttt{ucv6565/cuna/} seguido de un identificador propio, para que los mensajes de
+este proyecto no se mezclen con los de otros que usen el mismo broker.
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Tópico} & \textbf{Dirección} & \textbf{Contenido} \\
+\hline
+\texttt{.../state}   & Cuna al panel & Estado completo en JSON cada 2 s, retenido \\
+\texttt{.../event}   & Cuna al panel & Texto de cada aviso \\
+\texttt{.../cmd}     & Panel a la cuna & Orden en texto, como \texttt{rock:2} \\
+\hline
+\end{tabular}
+\end{center}
+
+El estado se publica con la bandera de retención, de modo que un panel que se abre
+después recibe de inmediato la última lectura. Las órdenes que entiende la cuna son
+\texttt{rock:0} a \texttt{rock:3} para detener o mecer, \texttt{fan:auto},
+\texttt{fan:on} y \texttt{fan:off} para el ventilador, \texttt{cry:} y \texttt{temp:}
+seguidos de un valor para cambiar los umbrales, y \texttt{beep} para probar el
+buzzer.
+
+El broker público no tiene autenticación, así que cualquiera que conozca el
+identificador podría leer el estado o enviar órdenes. Para una simulación académica es
+aceptable. Un producto real necesitaría un broker propio con usuario, contraseña y
+cifrado.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Panel web}
+
+El panel es una sola página HTML que se abre desde el teléfono o el computador. Se
+conecta al mismo broker por WebSocket seguro y se suscribe a los tópicos de estado y
+de avisos. Muestra el estado general de la cuna, las medidas de temperatura, humedad,
+peso, sonido, gas y pañal, una gráfica de los últimos cinco minutos con temperatura y
+sonido, y el registro de avisos con su hora. Tiene botones para detener o mecer con
+tres intensidades y para el modo del ventilador.
+
+La librería MQTT del panel va incluida en la carpeta del proyecto, de modo que la
+página solo necesita conexión para llegar al broker.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Resultados de la simulación}
+
+Se corrieron tres escenarios en el simulador Wokwi con los tiempos de la lógica
+acelerados diez veces para reducir la duración de cada prueba.
+
+\subsection*{Escenario 1: respuesta al llanto con escalada}
+
+Con el peso en 4~kg (bebé presente) y el deslizante de sonido al máximo, el mecido
+suave arrancó a los 2~s de mantenerse el ruido sobre el umbral. A los 6~s simulados
+(equivalentes a 60~s reales) el mecido subió a intensidad firme. A los 18~s simulados
+(180~s reales) sonó la alarma y el panel recibió el aviso de llanto prolongado. El
+mecido se detuvo solo a los 30~s simulados (5~min reales). La figura~\ref{fig:panel_c}
+muestra el panel durante el escenario.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=0.65\linewidth]{panel_c_llanto.jpg}
+\caption{Panel web durante el escenario de llanto. El bebé está presente, el
+mecido está activo y el evento de llanto aparece en el registro.}
+\label{fig:panel_c}
+\end{figure}
+
+\subsection*{Escenario 2: ventilador con histéresis}
+
+La temperatura inicial del DHT22 se ajustó a 24~°C. Al subirla por encima de 26~°C
+el relé cerró y el LED verde del ventilador encendió. Al bajarla a 24~°C el relé
+siguió cerrado; recién al llegar a 24,5~°C el relé abrió y el LED apagó. No se
+observaron oscilaciones del relé durante la transición. La figura~\ref{fig:panel_d}
+muestra el panel con el ventilador activo y el aviso de pañal mojado del mismo
+escenario.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=0.65\linewidth]{panel_d_calor_panal.jpg}
+\caption{Panel web con el ventilador encendido por temperatura alta y el aviso de
+pañal mojado activo.}
+\label{fig:panel_d}
+\end{figure}
+
+\subsection*{Escenario 3: aviso de gas}
+
+Al subir el deslizante de gas sobre el umbral, el panel recibió el aviso en el
+siguiente ciclo de publicación (menos de 2~s) y la alarma sonó de forma continua. Al
+bajar el deslizante, la alarma se detuvo y el aviso en el panel se marcó como
+resuelto. La figura~\ref{fig:panel_e} muestra el panel durante la alerta.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=0.65\linewidth]{panel_e_gas.jpg}
+\caption{Panel web con la alerta de gas activa. El aviso aparece en el registro con
+su hora y se rearma al bajar el nivel.}
+\label{fig:panel_e}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusiones}
+
+\begin{enumerate}[label=\arabic*.]
+  \item Una cuna que responde por escalones según la duración del llanto reduce las
+        reacciones a ruidos aislados y reserva la alarma para los casos prolongados.
+  \item El control con histéresis mantiene estable el ventilador sin oscilaciones del
+        relé.
+  \item MQTT permite separar la cuna del panel. Los dos solo comparten el broker y el
+        formato de los mensajes.
+  \item Las limitaciones del simulador se resolvieron con controles deslizantes
+        equivalentes a las señales analógicas de los sensores reales, y esa
+        sustitución queda declarada en el informe.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{thebibliography}{9}
+
+\bibitem{robocraze} Robocraze, ``25 Creative IoT Lab Projects for Engineering
+Students''. \url{https://robocraze.com/blogs/post/25-creative-iot-lab-projects-for-engineering-students}
+
+\bibitem{devmesh} Intel DevMesh, ``Smart Cradle System''.
+\url{https://devmesh.platformos.com/projects/smart-cradle-system}
+
+\bibitem{najah} Universidad Nacional An-Najah, repositorio institucional, proyecto de
+grado ``Comfort Sense baby bed'', 2024.
+\url{https://repository.najah.edu/bitstreams/dd7b1d37-ed68-477b-893e-2b435eaeec99/download}
+
+\bibitem{pmc} ``A novel smart baby cradle system utilizing IoT sensors and machine
+learning for optimized parental care''. PubMed Central, 2025.
+\url{https://pmc.ncbi.nlm.nih.gov/articles/PMC12125208/}
+
+\bibitem{ijirt} P. S. Pise et al., ``IoT-Based Intelligent Baby Cradle'', International
+Journal of Innovative Research in Technology, vol. 12, n.º 12, mayo de 2026.
+\url{https://ijirt.org/publishedpaper/IJIRT202278_PAPER.pdf}
+
+\bibitem{wokwiwifi} Wokwi Docs, ``ESP32 WiFi Networking''.
+\url{https://docs.wokwi.com/guides/esp32-wifi}
+
+\bibitem{wokwihx} Wokwi Docs, ``wokwi-hx711''.
+\url{https://docs.wokwi.com/parts/wokwi-hx711}
+
+\bibitem{wokwigas} Wokwi Docs, ``wokwi-gas-sensor''.
+\url{https://docs.wokwi.com/parts/wokwi-gas-sensor}
+
+\end{thebibliography}
+
+\end{document}

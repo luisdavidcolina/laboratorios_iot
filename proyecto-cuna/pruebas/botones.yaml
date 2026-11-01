@@ -1,0 +1,14 @@
+name: 'Botones fisicos del circuito'
+version: 1
+author: 'Luisdavid Colina'
+steps:
+  - wait-serial: 'Cuna conectada'
+  - set-control: {part-id: btn_baby, name: pressed, value: 1}
+  - delay: 300ms
+  - set-control: {part-id: btn_baby, name: pressed, value: 0}
+  - wait-serial: 'Simulacion de bebe en la cuna activada'
+  - set-control: {part-id: btn_cry, name: pressed, value: 1}
+  - delay: 300ms
+  - set-control: {part-id: btn_cry, name: pressed, value: 0}
+  - wait-serial: 'Llanto detectado'
+  - wait-serial: 'Mecido suave'

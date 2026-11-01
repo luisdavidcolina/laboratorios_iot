@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuna inteligente — Laboratorio IoT 6565</title>
+  <link rel="stylesheet" href="assets/css/fuentes.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/motion.css">
+</head>
+<body>
+
+<div id="deck"></div>
+
+<!-- Barra de presentador -->
+<div id="hud">
+  <button data-act="prev" title="Anterior (←)">&#8592;</button>
+  <span class="counter">01 / 10</span>
+  <button data-act="next" title="Siguiente (→)">&#8594;</button>
+  <button data-act="index" title="Índice (I)">&#9776;</button>
+  <span id="timer" title="Clic para iniciar/detener">00:00</span>
+  <button data-act="theme" title="Tema claro/oscuro (T)">&#9680;</button>
+  <button data-act="full"  title="Pantalla completa (F)">&#9974;</button>
+  <button data-act="help"  title="Ayuda (?)">?</button>
+</div>
+
+<!-- Número de lámina (salto) -->
+<div id="jump"></div>
+
+<!-- Apagado de pantalla -->
+<div id="blackout"></div>
+
+<!-- Ayuda de teclado -->
+<div id="help">
+  <div class="help-box">
+    <h2>Atajos de teclado</h2>
+    <table>
+      <tr><td>→ / Espacio / Enter</td><td>Avanzar</td></tr>
+      <tr><td>← / Retroceso</td><td>Retroceder</td></tr>
+      <tr><td>Inicio / Fin</td><td>Primera / Última lámina</td></tr>
+      <tr><td>0–9</td><td>Saltar a la lámina (ej. 07)</td></tr>
+      <tr><td>R</td><td>Iniciar / Detener cronómetro</td></tr>
+      <tr><td>T</td><td>Cambiar tema claro/oscuro</td></tr>
+      <tr><td>F</td><td>Pantalla completa</td></tr>
+      <tr><td>B</td><td>Apagar pantalla</td></tr>
+      <tr><td>I</td><td>Ir al índice</td></tr>
+      <tr><td>?</td><td>Esta ayuda</td></tr>
+    </table>
+    <p style="margin-top:16px;color:var(--text-faint);font-size:13px">Clic fuera para cerrar</p>
+  </div>
+</div>
+
+<!-- Slides en orden -->
+<script>window.DECK = [];</script>
+<script src="assets/js/slides/01-apertura.js"></script>
+<script src="assets/js/slides/02-sistema.js"></script>
+<script src="assets/js/slides/03-logica.js"></script>
+<script src="assets/js/slides/04-resultados.js"></script>
+<script src="assets/js/deck.js"></script>
+
+</body>
+</html>

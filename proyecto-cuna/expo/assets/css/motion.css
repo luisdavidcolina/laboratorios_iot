@@ -1,0 +1,248 @@
+/* ==========================================================================
+   motion.css : transiciones entre laminas, entradas y diagramas vivos
+   Regla de la casa: si una animacion no aclara algo o no marca un cambio de
+   escena, no va.
+   ========================================================================== */
+
+/* ── Transicion entre laminas, con direccion ─────────────────────────────
+   Avanzar empuja hacia la izquierda, retroceder hacia la derecha. El cerebro
+   lo lee como movimiento en un eje y no como un parpadeo. */
+
+@keyframes inFwd {
+  from { opacity: 0; transform: translate3d(54px, 0, 0) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes outFwd {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translate3d(-34px, 0, 0) scale(0.992); }
+}
+@keyframes inBack {
+  from { opacity: 0; transform: translate3d(-54px, 0, 0) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes outBack {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translate3d(34px, 0, 0) scale(0.992); }
+}
+
+[data-dir="fwd"] .slide.is-active { animation: inFwd 0.52s cubic-bezier(0.22, 1, 0.36, 1) both; }
+[data-dir="fwd"] .slide.leaving   { animation: outFwd 0.40s cubic-bezier(0.4, 0, 0.2, 1) both; }
+[data-dir="back"] .slide.is-active { animation: inBack 0.52s cubic-bezier(0.22, 1, 0.36, 1) both; }
+[data-dir="back"] .slide.leaving   { animation: outBack 0.40s cubic-bezier(0.4, 0, 0.2, 1) both; }
+
+/* ── Entrada escalonada de los elementos ─────────────────────────────────── */
+@keyframes rise {
+  from { opacity: 0; transform: translate3d(0, 20px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes slideRight {
+  from { opacity: 0; transform: translate3d(-26px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes wipeIn {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+@keyframes maskUp {
+  from { opacity: 0; transform: translate3d(0, 0.5em, 0); clip-path: inset(0 0 100% 0); }
+  to   { opacity: 1; transform: none; clip-path: inset(-0.2em 0 -0.2em 0); }
+}
+
+.slide.is-active .anim {
+  opacity: 0;
+  animation: rise 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(0.22s + var(--d, 0) * 0.065s);
+}
+
+.slide.is-active .anim.f  { animation-name: fade; }
+.slide.is-active .anim.z  { animation-name: zoomIn; }
+.slide.is-active .anim.sr { animation-name: slideRight; }
+
+/* Los titulos entran con mascara, que se lee mas caro que un fundido */
+.slide.is-active h1.title,
+.slide.is-active .cover h1,
+.slide.is-active .demo-hero .big {
+  animation: maskUp 0.78s cubic-bezier(0.22, 1, 0.36, 1) 0.16s both;
+}
+
+.slide.is-active .rule { animation: wipeIn 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.30s both; }
+
+/* Retrocompatibilidad con data-d, por si queda alguna lamina con el atributo */
+.slide.is-active .anim[data-d="1"]  { --d: 1; }
+.slide.is-active .anim[data-d="2"]  { --d: 2; }
+.slide.is-active .anim[data-d="3"]  { --d: 3; }
+.slide.is-active .anim[data-d="4"]  { --d: 4; }
+.slide.is-active .anim[data-d="5"]  { --d: 5; }
+.slide.is-active .anim[data-d="6"]  { --d: 6; }
+.slide.is-active .anim[data-d="7"]  { --d: 7; }
+.slide.is-active .anim[data-d="8"]  { --d: 8; }
+.slide.is-active .anim[data-d="9"]  { --d: 9; }
+.slide.is-active .anim[data-d="10"] { --d: 10; }
+.slide.is-active .anim[data-d="11"] { --d: 11; }
+.slide.is-active .anim[data-d="12"] { --d: 12; }
+
+/* ── Diagramas SVG vivos ─────────────────────────────────────────────────── */
+
+/* Trazo que se dibuja solo */
+.draw { stroke-dasharray: var(--len, 900); stroke-dashoffset: var(--len, 900); }
+.slide.is-active .draw { animation: drawLine 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards; }
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+.slide.is-active .draw.d1 { animation-delay: 0.6s; }
+.slide.is-active .draw.d2 { animation-delay: 0.8s; }
+.slide.is-active .draw.d3 { animation-delay: 1.0s; }
+
+/* Flujo de datos por el cable */
+.flow { stroke-dasharray: 5 13; animation: flowMove 1.5s linear infinite; }
+@keyframes flowMove { to { stroke-dashoffset: -36; } }
+.flow.slow { animation-duration: 2.8s; }
+.flow.rev  { animation-direction: reverse; }
+
+/* Nodo que late */
+.pulse { transform-origin: center; animation: pulseNode 2.6s ease-in-out infinite; }
+@keyframes pulseNode {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 0.85; transform: scale(1.12); }
+}
+.pulse.d1 { animation-delay: 0.4s; }
+.pulse.d2 { animation-delay: 0.8s; }
+.pulse.d3 { animation-delay: 1.2s; }
+.pulse.d4 { animation-delay: 1.6s; }
+
+/* Orbita lenta, para la portada */
+@keyframes orbit { to { transform: rotate(360deg); } }
+.orbit { transform-origin: center; animation: orbit 46s linear infinite; }
+.orbit.rev { animation-direction: reverse; animation-duration: 64s; }
+
+/* Chispa que recorre un anillo */
+@keyframes spark {
+  0%   { opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── Numeros que cuentan ─────────────────────────────────────────────────── */
+.count { font-variant-numeric: tabular-nums; }
+
+/* ── Marquesina de estados ───────────────────────────────────────────────── */
+.ticker {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+.ticker .th {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.ticker .live {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px rgba(23, 120, 74, 0.16);
+  animation: liveBlink 1.8s ease-in-out infinite;
+}
+
+@keyframes liveBlink { 50% { opacity: 0.25; } }
+
+.ticker .tr {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+}
+
+.ticker .tr:last-child { border-bottom: none; }
+.ticker .eid { color: var(--text-dim); }
+.ticker .eid .dom { color: var(--accent); }
+.ticker .val { color: var(--text); font-weight: 600; text-align: right; min-width: 96px; font-variant-numeric: tabular-nums; }
+.ticker .val.chg { animation: valueFlash 0.9s ease-out; }
+
+@keyframes valueFlash {
+  0%   { color: var(--accent); transform: translateY(-3px); }
+  100% { color: var(--text); transform: none; }
+}
+
+/* ── Secuencia que avanza sola ───────────────────────────────────────────── */
+.seq { display: flex; align-items: stretch; gap: 0; }
+
+.seq .sq {
+  flex: 1;
+  padding: 17px 19px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.38s, box-shadow 0.38s, transform 0.38s, background 0.38s;
+}
+
+.seq .sq.on {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: var(--glow), var(--card-shadow);
+  transform: translateY(-5px);
+}
+
+.seq .sq .sqk { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 7px; transition: color 0.38s; }
+.seq .sq.on .sqk { color: var(--accent); }
+.seq .sq .sqt { font-family: var(--font-display); font-size: 18px; font-weight: 650; margin-bottom: 5px; letter-spacing: -0.015em; }
+.seq .sq .sqd { font-size: 13.5px; line-height: 1.5; color: var(--text-dim); }
+
+.seq .arr { flex: none; width: 44px; display: grid; place-items: center; color: var(--text-faint); transition: color 0.38s; }
+.seq .arr svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.seq .arr.on { color: var(--accent); }
+
+/* ── Apagon: la nube muere, la casa sigue ────────────────────────────────── */
+.cloud-die   { animation: dieOut 5.5s ease-in-out infinite; }
+.house-alive { animation: stayLit 5.5s ease-in-out infinite; }
+
+@keyframes dieOut {
+  0%, 38%   { opacity: 0.9; }
+  42%       { opacity: 0.25; }
+  46%       { opacity: 0.8; }
+  52%, 88%  { opacity: 0.06; }
+  100%      { opacity: 0.9; }
+}
+
+@keyframes stayLit {
+  0%, 100% { opacity: 0.88; }
+  50%      { opacity: 1; }
+}
+
+/* ── Respeto por quien no quiere movimiento ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .slide.is-active, .slide.leaving,
+  .slide.is-active .anim,
+  .slide.is-active h1.title,
+  .slide.is-active .cover h1,
+  .slide.is-active .demo-hero .big,
+  .slide.is-active .rule,
+  .slide.is-active .draw {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+    clip-path: none !important;
+  }
+  .flow, .pulse, .orbit, .cloud-die, .house-alive, .live { animation: none !important; }
+}

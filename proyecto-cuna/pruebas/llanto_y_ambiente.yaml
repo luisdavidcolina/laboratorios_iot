@@ -1,0 +1,23 @@
+name: 'Llanto y ambiente con el tiempo acelerado x10'
+version: 1
+author: 'Luisdavid Colina'
+steps:
+  - wait-serial: 'Cuna conectada'
+  - set-control: {part-id: weight, name: position, value: 0.5}
+  - delay: 500ms
+  - set-control: {part-id: sound, name: position, value: 0.9}
+  - wait-serial: 'Llanto detectado'
+  - wait-serial: 'Mecido suave'
+  - wait-serial: 'Mecido firme'
+  - wait-serial: 'Llanto prolongado'
+  - wait-serial: 'Balanceo detenido a los 5 minutos'
+  - set-control: {part-id: sound, name: position, value: 0.05}
+  - wait-serial: 'El bebe se calmo'
+  - set-control: {part-id: dht, name: temperature, value: 29}
+  - wait-serial: 'Cuarto demasiado caliente'
+  - set-control: {part-id: wet, name: position, value: 0.9}
+  - wait-serial: 'Panal mojado'
+  - set-control: {part-id: gas, name: position, value: 0.9}
+  - wait-serial: 'Gas o humo detectado'
+  - delay: 1500ms
+  - take-screenshot: {part-id: oled, save-to: 'shots/oled_gas.png'}

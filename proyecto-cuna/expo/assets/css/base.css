@@ -1,0 +1,620 @@
+/* ==========================================================================
+   Home Assistant / Expo Lab IoT 6565 - UCV
+   base.css : tokens, tipografia, lienzo, UI de presentador, impresion
+
+   El tema CLARO es el predeterminado. Los videobeam de salon lavan los negros
+   y un deck oscuro se vuelve ilegible desde la tercera fila. El oscuro queda
+   disponible con la tecla T para cuando el equipo proyecte bien.
+   ========================================================================== */
+
+:root {
+  /* Lienzo */
+  --W: 1280px;
+  --H: 720px;
+
+  /* ── Paleta clara (predeterminada, pensada para proyector) ─────────────
+     Fondo gris muy claro en vez de blanco puro: el blanco puro en un
+     videobeam produce brillo y cansa la vista. Las tarjetas si van blancas,
+     para que se despeguen del fondo. */
+  --bg:         #F2F5F9;
+  --bg-2:       #E8EEF4;
+  --surface:    #FFFFFF;
+  --surface-2:  #F7FAFC;
+  --surface-3:  #EAF0F6;
+  --line:       #D3DDE7;
+  --line-soft:  #E6ECF2;
+
+  --text:       #0B1520;   /* casi negro, maximo contraste */
+  --text-dim:   #45576A;   /* cuerpo secundario, sigue legible proyectado */
+  --text-faint: #78899A;
+
+  --accent:     #0A7CAE;   /* cian oscurecido para leerse sobre blanco */
+  --accent-br:  #18BCF2;   /* cian brillante, solo para graficos y rellenos */
+  --accent-2:   #0E8F72;
+  --gold:       #8A5A00;
+  --danger:     #B8342A;
+  --ok:         #17784A;
+
+  --accent-ink: #FFFFFF;
+
+  --glow: 0 0 0 1px rgba(10, 124, 174, 0.16), 0 14px 34px -18px rgba(10, 124, 174, 0.40);
+  --shadow: 0 18px 44px -26px rgba(11, 30, 50, 0.42);
+  --card-shadow: 0 2px 4px -2px rgba(11, 30, 50, 0.10), 0 10px 26px -16px rgba(11, 30, 50, 0.24);
+
+  /* ── Tipografia ───────────────────────────────────────────────────────── */
+  /* Una sola familia, de trazo uniforme. Los titulos se distinguen por peso y
+     tamaño, no por cambiar de tipo. */
+  --font-display: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-body:    "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono:    "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+
+  /* Escala tipografica. Todo subio respecto a la primera version: a diez
+     metros de distancia, 13px no se leen. */
+  --t-hero:   84px;
+  --t-title:  46px;
+  --t-title2: 38px;
+  --t-lead:   19px;
+  --t-body:   15.5px;
+  --t-small:  14px;
+  --t-micro:  12.5px;
+
+  /* Ritmo */
+  --pad-x: 84px;
+  --pad-y: 56px;
+  --r-sm: 8px;
+  --r:    14px;
+  --r-lg: 22px;
+}
+
+/* ── Tema oscuro, disponible con la tecla T ─────────────────────────────── */
+:root[data-theme="dark"] {
+  --bg:         #070C11;
+  --bg-2:       #0B131B;
+  --surface:    #101A24;
+  --surface-2:  #16222F;
+  --surface-3:  #1D2C3C;
+  --line:       rgba(255, 255, 255, 0.11);
+  --line-soft:  rgba(255, 255, 255, 0.06);
+
+  --text:       #EAF2F8;
+  --text-dim:   #9DB0C0;
+  --text-faint: #6B7D90;
+
+  --accent:     #18BCF2;
+  --accent-br:  #18BCF2;
+  --accent-2:   #41E0B4;
+  --gold:       #F5C451;
+  --danger:     #FF7A6B;
+  --ok:         #45D68A;
+
+  --accent-ink: #061018;
+
+  --glow: 0 0 0 1px rgba(24, 188, 242, 0.20), 0 18px 48px -18px rgba(24, 188, 242, 0.45);
+  --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.85);
+  --card-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.9);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { overflow: hidden; background: var(--bg); width: 100%; height: 100%; }
+
+/* El cuerpo se fija al area realmente visible en vez de medir 100vh. En los
+   navegadores de telefono la barra de direcciones no entra dentro de 100vh,
+   asi que la lamina quedaba empujada hacia abajo y cortada por debajo. Con
+   posicion fija el recuadro coincide con lo que se ve. En un monitor el
+   resultado es exactamente el de siempre. */
+body {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv05" 1, "cv11" 1, "ss03" 1;
+}
+
+/* ── Lienzo escalable ────────────────────────────────────────────────────── */
+/* El centrado va por posicion absoluta y margen negativo, no por flexbox. El
+   lienzo mide 1280 por 720 aunque la pantalla sea mas chica, y un elemento
+   flexible que desborda a su contenedor no queda centrado igual en todos los
+   navegadores. De esta forma el centro cae siempre en el mismo punto.
+   Los margenes son la mitad exacta de --W y --H. */
+#deck {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--W);
+  height: var(--H);
+  margin: -360px 0 0 -640px;
+  transform-origin: center center;
+  transform: scale(1);
+  will-change: transform;
+}
+
+.slide {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  width: var(--W);
+  height: var(--H);
+  overflow: hidden;
+  background: var(--bg);
+  display: none;
+}
+
+.slide.is-active { display: block; z-index: 2; }
+.slide.leaving   { display: block; z-index: 1; pointer-events: none; }
+
+/* Textura de fondo. En claro es casi imperceptible, solo da profundidad. */
+.slide::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(820px 460px at 88% -14%, rgba(24, 188, 242, 0.10), transparent 60%),
+    radial-gradient(640px 460px at -10% 110%, rgba(14, 143, 114, 0.06), transparent 58%),
+    linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0 / 100% 44px,
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px) 0 0 / 44px 100%,
+    linear-gradient(168deg, var(--bg-2) 0%, var(--bg) 62%);
+  z-index: 0;
+}
+
+:root[data-theme="dark"] .slide::before {
+  background:
+    radial-gradient(900px 480px at 82% -12%, rgba(24, 188, 242, 0.13), transparent 62%),
+    radial-gradient(700px 500px at -8% 108%, rgba(65, 224, 180, 0.07), transparent 60%),
+    linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0 / 100% 40px,
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px) 0 0 / 40px 100%,
+    linear-gradient(170deg, var(--bg-2) 0%, var(--bg) 58%);
+}
+
+.slide > * { position: relative; z-index: 1; }
+
+/* ── Estructura interna de la lamina ─────────────────────────────────────── */
+.pad {
+  position: absolute;
+  inset: var(--pad-y) var(--pad-x) 50px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 13px;
+}
+
+/* Sin adornos delante del nombre de seccion */
+
+h1.title {
+  font-family: var(--font-display);
+  font-size: var(--t-title);
+  line-height: 1.06;
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  margin-bottom: 4px;
+  max-width: none;
+  text-wrap: balance;
+}
+
+h1.title.sm { font-size: var(--t-title2); }
+
+.subtitle {
+  font-size: var(--t-lead);
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 76ch;
+  margin-bottom: 20px;
+  font-weight: 400;
+}
+
+.rule {
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent) 12%, var(--line) 12%, var(--line) 100%);
+  margin: 16px 0 22px;
+  flex: none;
+  border-radius: 2px;
+}
+
+.body-area { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+.body-area.top { justify-content: flex-start; }
+
+em, .em { color: var(--accent); font-style: normal; font-weight: 600; }
+strong { color: var(--text); font-weight: 650; }
+.dim { color: var(--text-dim); }
+.mono { font-family: var(--font-mono); font-size: 0.94em; }
+
+/* ── Cronica inferior ────────────────────────────────────────────────────── */
+.slide-foot {
+  position: absolute;
+  left: var(--pad-x);
+  right: var(--pad-x);
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  z-index: 3;
+}
+
+.slide-foot .sec { color: var(--text-dim); font-weight: 500; }
+.slide-foot .spacer { flex: 1; height: 1px; background: var(--line); }
+
+.progress-track {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 4px;
+  background: var(--line-soft);
+  z-index: 10;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-theme="dark"] .progress-fill { box-shadow: 0 0 14px var(--accent); }
+
+/* ── Video: panel enmarcado, no fondo a sangre ───────────────────────────
+   Sobre claro un video oscuro a pantalla completa pelea con el texto. Metido
+   en un panel con marco se lee como una fotografia y deja de estorbar. */
+.slide-video {
+  position: absolute;
+  top: var(--pad-y);
+  right: var(--pad-x);
+  bottom: 50px;
+  width: 366px;
+  z-index: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: #0A1219;
+  box-shadow: var(--shadow), 0 0 0 1px var(--line);
+}
+
+.slide-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.slide-video video.ready { opacity: 1; }
+
+/* Degradado interno para que el borde no corte en seco */
+.slide-video::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(10, 18, 25, 0.55) 0%, transparent 34%);
+  pointer-events: none;
+}
+
+/* Respaldo cuando el clip no esta: el panel sigue existiendo y se ve bien */
+.video-missing {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  background:
+    radial-gradient(420px 360px at 50% 34%, rgba(24, 188, 242, 0.30), transparent 68%),
+    radial-gradient(320px 300px at 66% 82%, rgba(65, 224, 180, 0.18), transparent 64%),
+    linear-gradient(170deg, #12212E, #0A1219);
+}
+
+/* Cuando hay panel de video, el contenido deja ese espacio libre */
+.slide.has-video .pad { right: calc(var(--pad-x) + 366px + 34px); }
+
+/* ── Barra de presentador ────────────────────────────────────────────────── */
+#hud {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--card-shadow);
+  z-index: 9000;
+  opacity: 0.14;
+  transition: opacity 0.25s ease;
+  font-family: var(--font-mono);
+}
+
+:root[data-theme="dark"] #hud { background: rgba(7, 12, 17, 0.9); }
+
+#hud:hover, #hud.show { opacity: 1; }
+
+#hud button {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  width: 34px;
+  height: 30px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+#hud button:hover { color: var(--accent); background: rgba(10, 124, 174, 0.10); }
+#hud button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+#hud .hud-sep { width: 1px; height: 18px; background: var(--line); margin: 0 5px; }
+
+#hud .counter {
+  color: var(--text);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding: 0 10px;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+#hud .counter b { color: var(--accent); font-weight: 600; }
+
+#timer {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  padding: 0 10px;
+  min-width: 62px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+#timer.run  { color: var(--ok); }
+#timer.warn { color: var(--gold); }
+#timer.over { color: var(--danger); animation: pulseTime 1.4s ease-in-out infinite; }
+
+@keyframes pulseTime { 50% { opacity: 0.45; } }
+
+/* ── Pantalla negra (tecla B) ────────────────────────────────────────────── */
+#blackout { position: fixed; top: 0; right: 0; bottom: 0; left: 0; inset: 0; background: #000; z-index: 9500; display: none; }
+#blackout.on { display: block; }
+
+/* ── Salto rapido por numero ─────────────────────────────────────────────── */
+#jump {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 78px;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 18px 44px;
+  z-index: 9400;
+  display: none;
+  letter-spacing: 0.08em;
+  box-shadow: var(--shadow);
+}
+
+#jump.on { display: block; }
+
+/* ── Ayuda de teclas ─────────────────────────────────────────────────────── */
+#help {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  background: rgba(230, 236, 242, 0.92);
+  backdrop-filter: blur(10px);
+  z-index: 9600;
+  display: none;
+  place-items: center;
+}
+
+:root[data-theme="dark"] #help { background: rgba(3, 7, 11, 0.94); }
+
+#help.on { display: grid; }
+
+#help .card {
+  width: 580px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 34px 38px;
+  box-shadow: var(--shadow);
+}
+
+#help h3 { font-family: var(--font-display); font-size: 23px; margin-bottom: 18px; letter-spacing: -0.02em; }
+#help table { width: 100%; border-collapse: collapse; }
+#help td { padding: 8px 0; font-size: 14.5px; color: var(--text-dim); border-bottom: 1px solid var(--line-soft); }
+#help td:first-child { width: 180px; }
+#help kbd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 3px 8px;
+  color: var(--text);
+}
+
+/* ── Impresion / exportacion a PDF ───────────────────────────────────────── */
+@media print {
+  @page { size: 1280px 720px; margin: 0; }
+
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  html, body {
+    position: static !important;
+    overflow: visible !important;
+    width: auto !important;
+    height: auto !important;
+    display: block !important;
+    background: var(--bg) !important;
+  }
+
+  #hud, #blackout, #jump, #help, .progress-track { display: none !important; }
+
+  #deck {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    margin: 0 !important;
+    transform: none !important;
+    width: 1280px !important;
+    height: auto !important;
+  }
+
+  .slide {
+    display: block !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 1280px !important;
+    height: 720px !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* El salto va antes de cada lamina menos la primera, asi no queda una
+     hoja en blanco al final. */
+  .slide + .slide { page-break-before: always; break-before: page; }
+
+  .slide-video video { display: none !important; }
+
+  .anim, .anim * { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .rule { animation: none !important; clip-path: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Laminas en modo cine: oscuras a sangre completa, aunque el deck sea claro.
+   Se reservan para la portada y el cierre, que llevan poco texto y mucho
+   peso visual. El contraste entre esas dos y el resto marca el arranque y
+   el final, en vez de que todo se vea igual de plano.
+   ══════════════════════════════════════════════════════════════════════════ */
+.slide.cinema {
+  --bg:         #060A0F;
+  --bg-2:       #0A1019;
+  --surface:    #101A24;
+  --surface-2:  #16222F;
+  --line:       rgba(255, 255, 255, 0.13);
+  --line-soft:  rgba(255, 255, 255, 0.07);
+  --text:       #F2F7FB;
+  --text-dim:   #A8BBCB;
+  --text-faint: #71859A;
+  --accent:     #2FCBFF;
+  --accent-br:  #2FCBFF;
+  --accent-2:   #4DEEC0;
+  --gold:       #FFD070;
+  --accent-ink: #04121B;
+  color: var(--text);
+  background: #060A0F;
+}
+
+.slide.cinema::before {
+  background:
+    radial-gradient(1100px 620px at 74% 46%, rgba(24, 188, 242, 0.08), transparent 66%),
+    linear-gradient(180deg, rgba(6, 10, 15, 0.04) 0%, rgba(6, 10, 15, 0.10) 46%, rgba(6, 10, 15, 0.55) 100%);
+  z-index: 2;
+}
+
+/* El video ocupa toda la lamina */
+.slide.cinema .slide-video {
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  width: auto;
+  border-radius: 0;
+  box-shadow: none;
+  background: #060A0F;
+  z-index: 1;
+}
+
+.slide.cinema .slide-video video.ready { opacity: 0.96; }
+
+/* El reencuadre del clip de portada esta horneado en el archivo, no en CSS.
+   Un transform sobre el <video> lo manda a una capa aparte y hay equipos que
+   la componen mal. */
+
+/* Velo direccional: solido donde va el texto, limpio donde esta la imagen */
+.slide.cinema .slide-video::after {
+  background:
+    linear-gradient(100deg, rgba(6, 10, 15, 0.97) 0%, rgba(6, 10, 15, 0.92) 28%, rgba(6, 10, 15, 0.42) 52%, rgba(6, 10, 15, 0.04) 76%, transparent 100%),
+    linear-gradient(0deg, rgba(6, 10, 15, 0.80) 0%, transparent 34%);
+}
+
+.slide.cinema .pad { right: var(--pad-x); z-index: 3; }
+.slide.cinema .slide-foot { z-index: 4; }
+
+/* Capa para dibujar encima del video */
+.cine-fx {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Simplificacion para el PDF.
+   La reticula de fondo, los degradados y las sombras se redibujan vector a
+   vector en cada pagina. En pantalla no cuestan nada, pero en el PDF inflan
+   el archivo y hacen que el visor del navegador se atore. Para papel no
+   aportan, asi que se apagan.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media print {
+  .slide::before {
+    background: var(--bg) !important;
+  }
+
+  .slide.cinema::before {
+    background: linear-gradient(168deg, #0B1522 0%, #060A0F 70%) !important;
+  }
+
+  *, *::before, *::after {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Superficies planas en vez de degradados */
+  .card, .prod, .ticker, .seq .sq, .tl-seg, .toc-item, .shot {
+    background: var(--surface) !important;
+  }
+
+  .card.muted { background: transparent !important; }
+  .shot { background: #F2F5F8 !important; }
+  .code { background: #0B141C !important; }
+
+  /* El respaldo del video en las laminas de corte: un solo degradado simple */
+  .video-missing {
+    background: radial-gradient(520px 420px at 62% 44%, rgba(24, 188, 242, 0.26), transparent 70%), #0A1219 !important;
+  }
+
+  /* Los bordes finos con transparencia obligan a mezclar capas */
+  .slide-foot .spacer, .progress-track { display: none !important; }
+}
