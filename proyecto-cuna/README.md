@@ -68,7 +68,7 @@ Luego abrir `http://localhost:8000/panel/` o `http://localhost:8000/expo/`. Tamb
 2. Pegar el contenido de `sketch.ino` en la pestaña `sketch.ino`.
 3. Pegar el contenido de `diagram.json` en la pestaña `diagram.json`.
 4. Pegar el contenido de `libraries.txt` en la pestaña `libraries.txt`.
-5. Guardar e iniciar la simulación con el botón verde. El primer dato tardó entre 71 y 87 s en las pruebas, sobre todo por la compilación.
+5. Guardar e iniciar la simulación con el botón verde. El primer dato tardó entre 70 y 87 s en las pruebas, sobre todo por la compilación.
 
 **Una sola simulación a la vez con `lcolina`.** Dos simulaciones con el mismo identificador mezclan sus datos en el panel y ambas obedecen las mismas órdenes. Para probar en paralelo, cambiar `CRADLE_ID` en la copia y abrir el panel con `?id=` y ese valor.
 

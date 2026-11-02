@@ -1,54 +1,61 @@
 # Estado del proyecto final, cuna inteligente
 
-Corte del 1 de noviembre de 2026. La exposición es el 2 de noviembre.
+Corte del 1 de noviembre de 2026. La exposición es el 2 de noviembre. Integrantes: Luisdavid Colina y Samantha Ramírez.
 
 ## Qué es y por qué se eligió
 
-Cuna con ESP32 que detecta el llanto, mece con una intensidad que crece según la duración, controla un ventilador con histéresis y avisa a un panel web por MQTT. Todo el trabajo es en simulación sobre Wokwi.
+Cuna con ESP32 que detecta el llanto, mece con una intensidad que crece según la duración, controla un ventilador con histéresis y avisa a un panel web por MQTT y al teléfono por ntfy. Todo el trabajo es en simulación sobre Wokwi.
 
-Se partió de que fuera un producto práctico y útil para la casa, de nivel de estudiante, que se controlara desde el celular y que no se pareciera al comedero de gato con Telegram que hicieron otros compañeros. La cuna salió de la lista de 25 proyectos de Robocraze, donde figura como el número 19. Se descartaron la mascota virtual, el arcade, el invernadero, el parqueadero, la puerta con teclado, el radar, la papelera, el semáforo, el sismógrafo, el pastillero, el acuario, el brazo, la expendedora, la casa con cerebro y los monitores de energía, caídas, aire y clima.
+Se partió de que fuera un producto práctico y útil para la casa, de nivel de estudiante, que se controlara desde el celular y que no se pareciera al comedero de gato con Telegram que hicieron otros compañeros. La cuna salió de la lista de 25 proyectos de Robocraze, donde figura como el número 19.
 
-## Hecho y verificado
+## Verificado el 1 de noviembre
 
-| Qué | Cómo se verificó |
+Con el programa y el circuito finales, en copias temporales de Wokwi con identificador propio y contra el panel publicado. El método y los resultados están en `pruebas/README.md`.
+
+| Qué | Resultado |
 |---|---|
-| El programa compila para ESP32 | `arduino-cli`, 974 KB de 1.280 KB disponibles |
-| El circuito carga en Wokwi sin errores de pines | `wokwi-cli`, que solo reporta una advertencia por el tipo de placa, que no está documentado |
-| El ESP32 se conecta al WiFi `Wokwi-GUEST` y al broker de HiveMQ | Mensaje "Cuna conectada" en el simulador y mensajes recibidos desde un cliente externo |
-| Detección de llanto, mecido suave, firme, aviso prolongado, límite de 5 minutos, calma, calor, pañal y gas | Escenario `pruebas/llanto_y_ambiente.yaml`, con los tiempos acelerados diez veces |
-| El relé del ventilador sube con 27,5 °C | `expect-pin` en una corrida del simulador |
-| Los botones físicos del circuito activan la simulación | Escenario `pruebas/botones.yaml`, hasta el aviso de mecido suave |
-| El panel recibe el estado, muestra la escena y envía órdenes que el ESP32 ejecuta | Navegador automatizado pulsando los botones del panel con el ESP32 corriendo en Wokwi. Capturas en `vista_previa/` |
+| Tiempo real, 12 órdenes | Mediana 1,10 s, mínimo 0,83 s, máximo 5,90 s, ninguna perdida |
+| Reconexiones | 0 en 6 min y 0 en otra corrida de 9 min |
+| Modo demo | Suave 1,2 s, firme 11,9 s, aviso 32,2 s, límite 53,2 s, calma 57,6 s |
+| Histéresis | Subiendo, 25 sigue apagado y 27 enciende. Bajando, 25 sigue encendido y 24 apaga |
+| Ruido breve | Tres ruidos de hasta 1 s simulado no disparan el llanto, uno sostenido sí |
+| Gas y pañal | Rearme correcto, el panel coincide con la alarma real |
+| Movimiento | 2 g genera el aviso y el LED, 1 g rearma |
+| Avisos a ntfy | Los cuatro tipos, con HTTP 200 desde Wokwi |
+| Controles | Cuatro botones y 28 usos del panel publicado, todos confirmados |
+| Deslizantes | 0, 2050 y 4095. Peso 0, 4 y 8 kg |
+| Apagado | Sin señal a los 16 s, LWT a los 45 s. Al recargar nunca dice en línea |
+| Circuito | Todos los cables visibles, ninguno se cruza, sin avisos ERC |
+| Diapositivas | 16 láminas revisadas, sin desbordes ni recursos 404 |
+| Despliegue | `proyecto-cuna.vercel.app` se actualizó solo tras el push |
 
-## Hecho, sin verificar
+## Sin verificar
 
-- El circuito visto en el editor de Wokwi. Se confirmó que carga, pero nadie ha visto el dibujo con el nuevo `diagram.json` ordenado.
-- La velocidad de la simulación en el navegador de Wokwi. En la línea de comandos corre a un cuarto de la velocidad real.
-- Los tiempos reales sin acelerar de principio a fin. El plan gratuito corta la sesión a los 5 minutos.
-- La lectura del MPU6050, que el programa calcula pero ninguna regla usa todavía.
+- Recibir el aviso en un teléfono físico. Se comprobó consultando el tema de ntfy y en su página web.
+- Los tiempos sin dividir de 60 s, 180 s y 5 min de principio a fin, en reloj normal.
+- La velocidad en un navegador con interfaz. Las medidas son de un navegador sin interfaz, en este equipo.
+- Los escenarios `pruebas/*.yaml` con el programa final, porque requieren un token de Wokwi.
+- La duración de 11:55 de la exposición, que es una estimación sin ensayar.
 - La calibración de los umbrales con valores de un sensor real.
 
 ## Pendiente
 
 ### Depende de Luisdavid
 
-1. Probar el proyecto en wokwi.com y aprobar la simulación o decir qué cambiar. Los pasos están en `README.md`.
-2. Revocar el token de Wokwi CI en wokwi.com/dashboard/ci cuando pase la exposición.
+1. Pegar `sketch.ino`, `diagram.json` y `libraries.txt` en el proyecto de Wokwi y guardar. **Hasta entonces el panel avisa que la cuna corre un programa antiguo.**
+2. Revocar el token de Wokwi CI en wokwi.com/dashboard/ci después de la exposición.
 
-### Listo el 1 de noviembre
+### Grafana
 
-- `expo/index.html` creado. La presentación abre con doble clic.
-- 3 láminas faltantes escritas: resultados, conclusiones y referencias (`04-resultados.js`).
-- Capturas del panel copiadas a `expo/assets/img/`.
-- `guion.md` escrito con el texto hablado de cada lámina.
-- Informe: sección de resultados completada con capturas y descripción de los tres escenarios. Marca `\pendiente` eliminada.
-- `diagram.json` reordenado: piezas en zonas separadas, cables sin pisarse.
+No se hizo. Es opcional y requiere abrir Docker Desktop para poder probarlo.
 
 ## Límites conocidos
 
 - Sonido, peso, gas y pañal son controles deslizantes porque Wokwi no incluye micrófono y su celda de carga solo se maneja con escenarios.
-- El broker público de HiveMQ no tiene autenticación. Cualquiera que conozca el identificador `lcolina` puede leer el estado o enviar órdenes.
-- El panel marca "sin señal" si pasan 40 segundos sin estado.
+- El broker público de HiveMQ y el tema de ntfy no tienen autenticación. Cualquiera que conozca el identificador puede leer el estado o enviar órdenes.
+- Dos simulaciones con el mismo identificador mezclan sus datos. Debe correr una sola con `lcolina`.
+- Tras detener la simulación, Wokwi no cierra la conexión, así que el aviso de apagado tarda 1,5 veces el keepalive de 30 s.
+- La notificación del navegador solo funciona con el panel abierto, y en Android solo suena. Para el teléfono está ntfy.
 - Con la cuna vacía el llanto no produce respuesta, a propósito. En la demostración hay que poner primero al bebé.
 
 ## Archivos
@@ -56,12 +63,12 @@ Se partió de que fuera un producto práctico y útil para la casa, de nivel de 
 | Ruta | Contenido |
 |---|---|
 | `sketch.ino` | Programa del ESP32 |
-| `diagram.json` | Circuito de Wokwi (reordenado el 1-nov) |
+| `diagram.json` | Circuito de Wokwi |
 | `libraries.txt` | Librerías para Wokwi |
-| `panel/` | Panel web con la escena animada y los botones de simulación |
-| `pruebas/` | Escenarios automáticos y cómo correrlos |
+| `panel/` | Panel web |
+| `pruebas/` | Escenarios de Wokwi CLI, banco de verificación y resultados |
 | `informe/` | Informe en LaTeX y su PDF |
 | `expo/` | Presentación completa, abre con doble clic en `expo/index.html` |
-| `guion.md` | Texto hablado de cada lámina |
-| `vista_previa/` | Capturas del panel con el ESP32 corriendo en el simulador |
-| `README.md` | Cómo montarlo en Wokwi y los comandos MQTT |
+| `guion.md` | Texto hablado de cada lámina, repartido entre los dos, y guion de la demo |
+| `vista_previa/` | Capturas reales del panel y del circuito |
+| `README.md` | Cómo montarlo, enlaces, comandos y tópicos MQTT |
