@@ -9,3 +9,5 @@
 
 proyecto-cuna/.env.local
 proyecto-cuna/.vercel/
+.vercel
+.env*
