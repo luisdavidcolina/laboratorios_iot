@@ -1,11 +1,11 @@
-/* 01 - Apertura: portada, planteamiento y antecedentes */
+/* 01 - Apertura: portada, planteamiento, antecedentes y casos de uso */
 window.DECK.push(
 
 /* ─────────────────────────────── 01 Portada ─────────────────────────────── */
 {
   section: 'Portada',
   title: 'Portada',
-  min: '0:00 a 0:25',
+  min: '0:00 a 0:20',
   bare: true,
   html: `
   <div class="pad">
@@ -26,15 +26,15 @@ window.DECK.push(
 
       <p class="lede anim" data-d="5">
         Sistema con ESP32 y MQTT que responde al llanto con un balanceo graduado, regula la
-        temperatura del cuarto y avisa a los padres desde un panel web. Se desarrolló y se
-        verificó en el simulador Wokwi.
+        temperatura del cuarto y avisa a los padres en un panel web y en el teléfono. Se
+        desarrolló y se verificó en el simulador Wokwi.
       </p>
 
       <div class="who anim" data-d="7">
         <div><b>Luisdavid Colina</b>V-24.766.381</div>
+        <div><b>Samantha Ramírez</b>V-31.307.714</div>
         <div><b>Prof. Antonio Russoniello</b>Semestre 01-2026</div>
-        <div><b>Escuela de Computación</b>Facultad de Ciencias, UCV</div>
-        <div><b>Caracas</b>2 de noviembre de 2026</div>
+        <div><b>Escuela de Computación, UCV</b>Caracas, 2 de noviembre de 2026</div>
       </div>
     </div>
   </div>`
@@ -44,7 +44,7 @@ window.DECK.push(
 {
   section: 'Planteamiento',
   title: 'Planteamiento del problema',
-  min: '0:25 a 1:05',
+  min: '0:20 a 0:55',
   html: `
   <div class="pad">
     <div class="kicker anim" data-d="1">Planteamiento</div>
@@ -90,7 +90,7 @@ window.DECK.push(
 {
   section: 'Antecedentes',
   title: 'Antecedentes',
-  min: '1:05 a 1:50',
+  min: '0:55 a 1:25',
   html: `
   <div class="pad">
     <div class="kicker anim" data-d="1">Antecedentes</div>
@@ -134,6 +134,73 @@ window.DECK.push(
         <p style="color:var(--text);font-size:16px">Respuesta que escala según la duración del llanto, ventilador con
         histéresis y un panel que se maneja por MQTT con las mismas órdenes que entiende el programa.</p>
       </div>
+    </div>
+  </div>`
+},
+
+/* ───────────────────────────── 04 Casos de uso ──────────────────────────── */
+{
+  section: 'Casos de uso',
+  title: 'Casos de uso',
+  min: '1:25 a 2:15',
+  html: `
+  <div class="pad">
+    <div class="kicker anim" data-d="1">Uso en el mundo real</div>
+    <h1 class="title anim" data-d="2">Casos de uso</h1>
+    <p class="subtitle anim" data-d="3">
+      El actor es quien cuida al bebé, que puede estar en otra habitación con el teléfono.
+    </p>
+    <div class="rule"></div>
+
+    <div class="body-area">
+      <table class="t compact anim f" data-d="4">
+        <thead>
+          <tr>
+            <th style="width:190px">Caso</th>
+            <th style="width:280px">Qué lo dispara</th>
+            <th>Qué hace la cuna</th>
+            <th style="width:230px">A quién avisa</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Llanto del bebé</td>
+            <td>Ruido alto por 2 s con el bebé presente</td>
+            <td>Mece suave, firme al minuto, y se detiene a los 5 min</td>
+            <td>Teléfono a los 3 min de llanto</td>
+          </tr>
+          <tr>
+            <td>Pañal mojado</td>
+            <td>Lectura de humedad sobre el umbral</td>
+            <td>Pitido y LED rojo</td>
+            <td>Teléfono</td>
+          </tr>
+          <tr>
+            <td>Cuarto caliente</td>
+            <td>26 °C o más</td>
+            <td>Enciende el ventilador y lo apaga a 24,5 °C</td>
+            <td>Panel, a partir de 28 °C</td>
+          </tr>
+          <tr>
+            <td>Gas o humo</td>
+            <td>Lectura de gas sobre el umbral</td>
+            <td>Alarma continua y LED rojo</td>
+            <td>Teléfono, con prioridad máxima</td>
+          </tr>
+          <tr>
+            <td>Movimiento brusco</td>
+            <td>Más de 0,5 g de desviación en el MPU6050</td>
+            <td>LED rojo</td>
+            <td>Teléfono</td>
+          </tr>
+          <tr>
+            <td>Control a distancia</td>
+            <td>El cuidador pulsa un botón del panel</td>
+            <td>Mece, maneja el ventilador o ajusta umbrales</td>
+            <td>Panel, que confirma cada orden</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>`
 }

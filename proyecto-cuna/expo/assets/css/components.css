@@ -855,3 +855,15 @@ table.t th { font-size: 12px; letter-spacing: 0.14em; }
 /* La lamina de referencias reparte el espacio en vez de amontonar arriba */
 .refs { font-size: 14.5px; line-height: 1.9; }
 .refs .r { margin-bottom: 10px; }
+
+/* ── Laminas de diseno: tabla densa de hardware, tarjetas de software y circuito ── */
+table.t.hw td { padding: 5.5px 14px; font-size: 13px; }
+table.t.hw th { padding-bottom: 7px; }
+.tools .card { padding: 13px 16px; }
+.tools .card h3 { margin-bottom: 3px; }
+.tools .card p { font-size: 13.5px; line-height: 1.45; }
+.circuit-row { display: grid; grid-template-columns: auto 1fr; gap: 26px; align-items: start; }
+.circuit-img { display: block; cursor: zoom-in; }
+.circuit-img img { display: block; height: 490px; width: auto; border-radius: 10px; border: 1px solid var(--line); }
+
+.slide a { color: var(--accent); }
