@@ -1,9 +1,3 @@
 {
-  "version": 2,
-  "name": "cuna-iot-panel",
-  "public": true,
-  "outputDirectory": "panel",
-  "routes": [
-    { "src": "/(.*)", "dest": "/$1" }
-  ]
+  "outputDirectory": "panel"
 }
